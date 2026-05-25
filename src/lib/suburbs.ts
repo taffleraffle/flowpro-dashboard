@@ -175,7 +175,7 @@ export const getSuburbDistribution = unstable_cache(
         .select('site_address, total_ex_tax, date_completed, raw')
         .eq('is_complete', true)
         .range(from, from + PAGE - 1);
-      if (error) throw new Error(error.message);
+      if (error) break; // table missing or query failed — return whatever we have
       const rows = data ?? [];
       for (const r of rows) {
         const matched = matchSuburb(r.site_address ?? '');

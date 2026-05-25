@@ -77,9 +77,9 @@ async function aggregateWindow(window: MetricsWindow) {
       .eq('is_complete', true),
     null,
   ]);
-  if (leadsRes.error) throw new Error(`wc_leads count: ${leadsRes.error.message}`);
-  if (wonRes.error) throw new Error(`wc_leads won: ${wonRes.error.message}`);
-  if (jobsRes.error) throw new Error(`simpro_jobs: ${jobsRes.error.message}`);
+  if (leadsRes.error || wonRes.error || jobsRes.error) {
+    return { leads: 0, won: 0, jobs: null, revenue: null, avgDist: null };
+  }
 
   // `jobs` is now pre-filtered to is_complete via the query above.
   // We return null (not 0) when there are zero rows, so the dashboard can
@@ -150,8 +150,9 @@ async function _getDailySeries(window: MetricsWindow): Promise<DailySeries> {
       .gte('date_created', window.startDate)
       .lte('date_created', window.endDate),
   ]);
-  if (jobsRes.error) throw new Error(jobsRes.error.message);
-  if (leadsRes.error) throw new Error(leadsRes.error.message);
+  if (jobsRes.error || leadsRes.error) {
+    return { dates: [], revenue: [], jobs: [], leads: [] };
+  }
 
   // Build day bucket list — parsed as UTC so bucket keys match Supabase's
   // string-comparison against YYYY-MM-DD on `timestamptz` columns.
@@ -271,7 +272,7 @@ async function _getAcquisition(window: MetricsWindow): Promise<AcquisitionRow[]>
     .select('id, lead_source, lead_medium, gclid, msclkid, fbclid, sales_value, lead_status, quotable')
     .gte('date_created', window.startDate)
     .lte('date_created', window.endDate);
-  if (error) throw new Error(`acquisition query: ${error.message}`);
+  if (error) return []; // wc_leads not ready yet
 
   // 2) For revenue per channel, use the WC↔SimPro bridge instead of WC's
   //    `sales_value` (which is almost always empty). For each lead that has
@@ -443,7 +444,7 @@ export async function getServiceCategories(window: MetricsWindow): Promise<Servi
     .gte('date_completed', window.startDate)
     .lte('date_completed', window.endDate)
     .eq('is_complete', true);
-  if (error) throw new Error(error.message);
+  if (error) return []; // simpro_jobs not ready yet
   const rows = data ?? [];
 
   const grouped = new Map<string, { jobs: number; revenue: number }>();
@@ -504,7 +505,7 @@ async function _getRecentSyncRuns(limit = 8): Promise<SyncRunRow[]> {
     .select('id, source, started_at, finished_at, status, rows_upserted, error_message')
     .order('started_at', { ascending: false })
     .limit(limit);
-  if (error) throw new Error(`sync_runs query failed: ${error.message}`);
+  if (error) return []; // table may not exist yet — degrade gracefully
   return (data ?? []) as SyncRunRow[];
 }
 
