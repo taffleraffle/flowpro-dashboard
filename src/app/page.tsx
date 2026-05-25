@@ -39,16 +39,25 @@ export default async function OverviewPage({
     : win.period;
 
 
-  const [kpis, daily, acquisition, funnel, services, runs, suburbs, errorRuns] = await Promise.all([
-    getOverviewKpis(window),
-    getDailySeries(window),
-    getAcquisition(window),
-    getFunnel(window),
-    getServiceCategories(window),
-    getRecentSyncRuns(8),
-    getSuburbDistribution(),
-    getActiveErrors(),
-  ]);
+  let pageData: Awaited<ReturnType<typeof loadPageData>>;
+  try {
+    pageData = await loadPageData(window);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return (
+      <main style={{ padding: '48px 32px', fontFamily: 'system-ui, sans-serif', maxWidth: 680 }}>
+        <h2 style={{ color: '#c53030', marginBottom: 12, fontSize: 22 }}>Dashboard data error</h2>
+        <p style={{ color: '#555', marginBottom: 16, lineHeight: 1.6 }}>
+          The dashboard couldn&apos;t load data from the database. This usually means the sync hasn&apos;t run yet
+          or the database tables are still being set up.
+        </p>
+        <pre style={{ background: '#f5f5f5', border: '1px solid #ddd', padding: '12px 16px', borderRadius: 6, fontSize: 13, overflow: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+          {msg}
+        </pre>
+      </main>
+    );
+  }
+  const [kpis, daily, acquisition, funnel, services, runs, suburbs, errorRuns] = pageData;
 
   const lastOk = runs.find(r => r.status === 'ok')?.started_at;
   const lastSyncLabel = lastOk
@@ -210,6 +219,19 @@ export default async function OverviewPage({
       </div>
     </>
   );
+}
+
+function loadPageData(window: { startDate: string; endDate: string }) {
+  return Promise.all([
+    getOverviewKpis(window),
+    getDailySeries(window),
+    getAcquisition(window),
+    getFunnel(window),
+    getServiceCategories(window),
+    getRecentSyncRuns(8),
+    getSuburbDistribution(),
+    getActiveErrors(),
+  ]);
 }
 
 function greeting() {
