@@ -1,0 +1,7 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    { "path": "/api/sync/simpro", "schedule": "*/30 * * * *" },
+    { "path": "/api/sync/whatconverts", "schedule": "*/30 * * * *" }
+  ]
+}

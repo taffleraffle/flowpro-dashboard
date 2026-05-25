@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Simpro Software API</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom fonts for this template -->
+    <link href="/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="/vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet" type="text/css">
+    <link rel="preload" href="/css/fonts/Cocogoose-Pro-Letterpress-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora&family=Oswald:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link rel="stylesheet" href="./assets/css/redoc.css">
+
+    <link rel="stylesheet" 
+      href='/css/custom.css?v=1776726866'>
+
+    <link rel="stylesheet" 
+      href='/css/custom-api-docs.css?v=1776726866'>
+
+    <link rel="shortcut icon" type="image/png" href="/favicon.png" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-JS8MEXZYKT"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'G-JS8MEXZYKT');
+    </script>
+
+</head>
+<body>
+    <button onclick="topFunction()" class="btn btn-warning" id="backToTopBtn" title="Back to top">TOP</button>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="/"><img src="./assets/img/simpro-wordmark-white.svg" width="121" height="25" alt="Simpro wordmark - white" style="position:relative;top:-3px;" /> &nbsp; &nbsp; DEVELOPER CENTER</a>
+        <ul class="navbar-nav mr-auto">
+                            <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Getting Started</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                            <a class="dropdown-item" href="?page=57be307ee1bd93b729fdc4c13f15e201">Getting Started with the API</a>
+                                            <a class="dropdown-item" href="?page=b0d64c044a432c8e0f9f01e0641d5596">Understanding grant types</a>
+                                            <a class="dropdown-item" href="?page=5b265889ce433f9710dcef721505c158">Registering your application</a>
+                                            <a class="dropdown-item" href="?page=3366d2ea7906f693b27d57ed9cca3acb">Authenticating your application</a>
+                                            <a class="dropdown-item" href="?page=ff7c0fcd6a31e735a61c001f75426961">Examples</a>
+                                            <a class="dropdown-item" href="?page=07adc9c3c19b7c17e7309e86c22161a2">Advanced usage</a>
+                                            <a class="dropdown-item" href="?page=cd8682773ab1b07fdc9661984e281ce3">Web Hooks</a>
+                                            <a class="dropdown-item" href="?page=ed8457e003ba0f6197756eca5a61fde9">API Call Limits</a>
+                                    </div>
+            </li>
+                            <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">People</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                            <a class="dropdown-item" href="?page=9aa698f602b1e5694855cee73a683488">Contacts</a>
+                                            <a class="dropdown-item" href="?page=0f475af584faa19c9b62d780d7199320">Contractors</a>
+                                            <a class="dropdown-item" href="?page=e6d0e1c8fc6a4fcf47869df87e04cd88">Customers</a>
+                                            <a class="dropdown-item" href="?page=eb626c94531ec554f93b2b78a77c8b1b">Employees</a>
+                                            <a class="dropdown-item" href="?page=3faa64303d5f5bcd043bb88f6768e603">Sites</a>
+                                            <a class="dropdown-item" href="?page=8f7f93630c366dc55aec88eb8e9640d0">Staff</a>
+                                            <a class="dropdown-item" href="?page=be3439768cb74608cedb2e37a74820d7">Vendors/Supplier</a>
+                                            <a class="dropdown-item" href="?page=21e4164bfdb63312a661b92332eedbec">Licences</a>
+                                            <a class="dropdown-item" href="?page=19dd958c242088d0995f3c3759b8b88d">Timesheets</a>
+                                    </div>
+            </li>
+                            <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Projects</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                            <a class="dropdown-item" href="?page=12ceff2290bb9039beaa8f36d5dec226">Jobs</a>
+                                            <a class="dropdown-item" href="?page=e20580fa653ea5969f97040b4eb3c8db">Job Cost Centers</a>
+                                            <a class="dropdown-item" href="?page=47d1b3eff79ecdfc51222ea2d777571f">Recurring Jobs</a>
+                                            <a class="dropdown-item" href="?page=148bce8a0c5456179665350afe0e5b6f">Recurring Job Cost Centers</a>
+                                            <a class="dropdown-item" href="?page=ae5361473c0038d7f8c4b4236c50b2da">Leads</a>
+                                            <a class="dropdown-item" href="?page=c9a28e7f0dbc3ed20a161351c4f29a7b">Quotes</a>
+                                            <a class="dropdown-item" href="?page=fb78ee4e3878df89f4c9876b104c8798">Quotes Cost Centers</a>
+                                            <a class="dropdown-item" href="?page=e2a18aeb5468c988d1400f8de506746b">Contractor Jobs</a>
+                                    </div>
+            </li>
+                            <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Materials</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                            <a class="dropdown-item" href="?page=5408c752aea14ba352fc3dad16b268d8">Catalogs</a>
+                                            <a class="dropdown-item" href="?page=567bb087576e68109daf1d04361ff0d6">Inventory/Stock</a>
+                                            <a class="dropdown-item" href="?page=128c7259ed396d9691286cc1ddcbc541">Prebuilds</a>
+                                            <a class="dropdown-item" href="?page=b72986a9f1dc4942a3df6497034b4e13">Take Off Templates</a>
+                                            <a class="dropdown-item" href="?page=eeae34fa55541b5224728232b13e1f75">Vendor/Supplier Quotes</a>
+                                            <a class="dropdown-item" href="?page=1ce5d9607216ee37fb61fe793d38e2c3">Vendor/Supplier Orders</a>
+                                    </div>
+            </li>
+                            <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Payments and Invoicing</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                            <a class="dropdown-item" href="?page=fce9a6a1bd2a2050eb86d33103f46fd3">Invoices</a>
+                                            <a class="dropdown-item" href="?page=4a13b7d6ede54db66195b81af6c4b0d1">Contractor Invoices</a>
+                                            <a class="dropdown-item" href="?page=166bb94a7df2dd7995b3aca6254e02f0">Customer Payments</a>
+                                            <a class="dropdown-item" href="?page=a8231ece0d8c47b8bf1875242406c189">Vendor/Supplier Receipts</a>
+                                            <a class="dropdown-item" href="?page=69cae2bceec138665128e23a470a6e5e">Vendor/Supplier Credits</a>
+                                            <a class="dropdown-item" href="?page=a028944d25abee97a013c7f3f0090254">Recurring Invoices</a>
+                                            <a class="dropdown-item" href="?page=e4fd2a6fb35c481dea479f7a255c108b">Recurring Invoice Cost Centers</a>
+                                            <a class="dropdown-item" href="?page=bd16af1838f0dd73a528391790db0115">Credit Notes</a>
+                                    </div>
+            </li>
+                            <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Setup</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                            <a class="dropdown-item" href="?page=9b945efebb006547a94415eadaa12921">Accounts</a>
+                                            <a class="dropdown-item" href="?page=d78ed35383108fb6c04c16d0a11b20fe">Activities</a>
+                                            <a class="dropdown-item" href="?page=dd530f67a3c5c4f3768841df8f40fb0f">Asset Builder</a>
+                                            <a class="dropdown-item" href="?page=91928855a44a5836a434269ec3b5c6b2">Archive Reasons</a>
+                                            <a class="dropdown-item" href="?page=62cc48113b97b0cb4e5f9ad4adbe4c58">Commissions</a>
+                                            <a class="dropdown-item" href="?page=dfcfc43722eef1eab1e4a12e50a068b1">Currencies</a>
+                                            <a class="dropdown-item" href="?page=833956a760d996ae61ea8b385e9fb6f0">Custom Fields</a>
+                                            <a class="dropdown-item" href="?page=2230223f77c24a72b50f03120db32b1a">Customer Groups</a>
+                                            <a class="dropdown-item" href="?page=6f1988fab57c948ef2d180545432744b">Customer Profiles</a>
+                                            <a class="dropdown-item" href="?page=9d590cb9ad8969796f67b63a2f94f1a7">Labor/Fees</a>
+                                            <a class="dropdown-item" href="?page=23ce0eb7d180f3dc8391d4af48572d21">Materials</a>
+                                            <a class="dropdown-item" href="?page=a7a7b26872b3e2d00de7bb7b1452b5a8">Memberships</a>
+                                            <a class="dropdown-item" href="?page=f1771907f4365e2f876df28d5a471371">Response Times</a>
+                                            <a class="dropdown-item" href="?page=fe11e14b29ee1462bdb7764b3ba2f4bd">Security Groups</a>
+                                            <a class="dropdown-item" href="?page=8a6a14b567ca5591a91d9a164088812b">Status Codes</a>
+                                            <a class="dropdown-item" href="?page=189f63f277cd73395561651753563065">Tags</a>
+                                            <a class="dropdown-item" href="?page=39d70739ea1835b927cd2733be6ad7e3">Task Builder</a>
+                                            <a class="dropdown-item" href="?page=7e465bac7ed6e5c14972e5ff1487049d">Tax Codes</a>
+                                            <a class="dropdown-item" href="?page=1fe1b6cf4f52930c301b03e5a69c42c2">Teams</a>
+                                            <a class="dropdown-item" href="?page=ef201d96de80d31272bd099dbc695dfb">Webhook Subscriptions</a>
+                                            <a class="dropdown-item" href="?page=dad1f8d794ee0dd7753fe75e73b78f31">Zones</a>
+                                    </div>
+            </li>
+                            <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Reports</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                            <a class="dropdown-item" href="?page=24a38b0094ad3d02d00c883fd54a2cf6">Job Reports</a>
+                                    </div>
+            </li>
+                            <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Others</a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                            <a class="dropdown-item" href="?page=9bbd45bad55cfc620803907f2d8a0217">Accounting</a>
+                                            <a class="dropdown-item" href="?page=edefbda3a2bdd979e42d8944b7325b79">Companies</a>
+                                            <a class="dropdown-item" href="?page=3352d5e59a4d8d5e7d3888ebd86c8064">Customer Assets</a>
+                                            <a class="dropdown-item" href="?page=c4b3c86fec14298ef0fc42030c2507a8">Current User</a>
+                                            <a class="dropdown-item" href="?page=4059b0251f66a18cb56f544728796875">Info</a>
+                                            <a class="dropdown-item" href="?page=b2d37ae1cedf42ff874289b721860af2">Logs</a>
+                                            <a class="dropdown-item" href="?page=7356d7d84d7b589fc626e1ef374440c2">Plant and Equipment</a>
+                                            <a class="dropdown-item" href="?page=ccdb7bf9d93e5652b57cabcc8c41e061">Schedules</a>
+                                            <a class="dropdown-item" href="?page=ef615563c8e8ea902c7fcac3cd2c4246">Tasks</a>
+                                            <a class="dropdown-item" href="?page=401740175cb9b4b5190e6d44cc5478bd">Work Orders / Job Cards</a>
+                                    </div>
+            </li>
+                    </ul>
+        <div class="nav navbar-nav pull-md-right">
+            <a class="btn btn-warning" href="https://apiforum.simprogroup.com/" target="_blank">FORUM</a>
+            <ul class="nav navbar-nav">
+                <li class="nav-item">
+                    <span class="nav-link">v1.0</span>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div>
+        <redoc spec-url='./assets/json/3366d2ea7906f693b27d57ed9cca3acb.json' suppress-warnings="true" required-props-first="true" no-auto-auth="true" expand-responses="all" hide-hostname="true" hide-download-button="true"></redoc>
+        <script src="./assets/js/redoc.standalone.js"> </script>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+    <script>
+        // When the user scrolls down 20px from the top of the document, show the button
+        window.onscroll = function() {scrollFunction()};
+
+        function scrollFunction() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                document.getElementById("backToTopBtn").style.display = "block";
+            } else {
+                document.getElementById("backToTopBtn").style.display = "none";
+            }
+        }
+
+        // When the user clicks on the button, scroll to the top of the document
+        function topFunction() {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        }
+
+        $('redoc').ready(function() {
+            // add target="_blank" to all "External Docs" link in the description.
+            $(this).find('redoc-externaldocs').find('a').attr('target', '_blank');
+
+            // add target="_blank" to all relative links in the column description.
+            $(this).find('.redoc-markdown-block').find('a').filter(function() {
+                return this.outerHTML.indexOf('http') > -1;
+            }).attr('target', '_blank');
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9fc0e5b79a4d5324',t:'MTc3ODgzNTA1MA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>

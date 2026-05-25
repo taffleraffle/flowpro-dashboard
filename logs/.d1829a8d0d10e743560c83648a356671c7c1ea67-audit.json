@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "C:\\Users\\Ben\\projects\\flowpro-dashboard\\logs\\.d1829a8d0d10e743560c83648a356671c7c1ea67-audit.json",
+    "files": [
+        {
+            "date": 1779685914399,
+            "name": "C:\\Users\\Ben\\projects\\flowpro-dashboard\\logs\\mcp-puppeteer-2026-05-25.log",
+            "hash": "a6c24dd5191095ff602ea0c3b6feef7cfb797944cdfb7051a4cf370c0c509151"
+        }
+    ],
+    "hashType": "sha256"
+}

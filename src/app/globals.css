@@ -1,0 +1,483 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   FlowPro design tokens — mirrored from reference styles.css
+   Kept as raw CSS so we can use them in className via plain
+   class names matching the reference (.kpi, .card, .topbar etc.)
+   ============================================================ */
+
+:root {
+  --navy-900: #061B30;
+  --navy-800: #0A2540;
+  --navy-700: #0D3556;
+  --navy-600: #134268;
+  --navy-500: #1E5380;
+  --navy-100: #DCE6EE;
+
+  --cyan-700: #0F8CB8;
+  --cyan-600: #1BA8D4;
+  --cyan-500: #2BBDE6;
+  --cyan-300: #7DD3E8;
+  --cyan-100: #C8EAF3;
+  --cyan-50:  #E8F4F9;
+
+  --bg:        #F5F8FA;
+  --surface:   #FFFFFF;
+  --surface-2: #FAFBFC;
+  --border:    #E1E7ED;
+  --border-2:  #D0D9E1;
+  --divider:   #ECF0F3;
+
+  --ink:       #0A2540;
+  --ink-2:     #2C3E50;
+  --muted:     #6B7A88;
+  --muted-2:   #93A1AE;
+
+  --success:   #15A36A;
+  --success-bg:#E5F4EC;
+  --warn:      #E8A93C;
+  --warn-bg:   #FBF1DC;
+  --danger:    #D14543;
+  --danger-bg: #FBE6E5;
+
+  --radius-sm: 6px;
+  --radius:    10px;
+  --radius-lg: 14px;
+
+  --shadow-sm: 0 1px 2px rgba(10,37,64,.04), 0 1px 1px rgba(10,37,64,.03);
+  --shadow:    0 1px 3px rgba(10,37,64,.06), 0 4px 12px rgba(10,37,64,.04);
+  --shadow-lg: 0 4px 16px rgba(10,37,64,.08), 0 16px 40px rgba(10,37,64,.06);
+
+  --font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --font-body:    'Barlow', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--bg);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; cursor: pointer; }
+
+.display    { font-family: var(--font-display); font-weight: 700; letter-spacing: -.01em; line-height: 1; }
+.display-up { text-transform: uppercase; letter-spacing: .04em; }
+.num        { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }
+.eyebrow {
+  font-family: var(--font-body);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: 11px;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 6px;
+  line-height: 1;
+}
+
+/* Top bar — white, with subtle bottom rule + soft shadow */
+.topbar {
+  background: var(--surface);
+  color: var(--ink);
+  height: 64px;
+  display: flex; align-items: center; padding: 0 24px; gap: 20px;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(10,37,64,.02), 0 8px 24px -16px rgba(10,37,64,.08);
+  position: sticky; top: 0; z-index: 30;
+}
+.topbar .logo-wordmark { font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: -.01em; line-height: 1; color: var(--ink); }
+.topbar .logo-wordmark .pro { color: var(--cyan-600); }
+.topbar nav { display: flex; gap: 2px; margin-left: 4px; }
+.topbar nav a {
+  position: relative;
+  color: var(--muted);
+  padding: 22px 14px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  transition: color .15s;
+}
+.topbar nav a:hover { color: var(--ink); }
+.topbar nav a.active { color: var(--ink); }
+.topbar nav a.active::after {
+  content: '';
+  position: absolute;
+  left: 14px; right: 14px; bottom: -1px;
+  height: 2px;
+  background: var(--cyan-600);
+  border-radius: 2px 2px 0 0;
+}
+.topbar .spacer { flex: 1; }
+.topbar .user {
+  display: flex; align-items: center; gap: 10px;
+  padding: 4px 6px 4px 4px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.topbar .user .av { width: 30px; height: 30px; border-radius: 50%; background: var(--cyan-600); color: #fff; font-family: var(--font-display); font-weight: 700; display: grid; place-items: center; font-size: 13px; }
+.topbar .user .name { font-weight: 600; font-size: 13px; color: var(--ink); }
+.topbar .user .role { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+
+/* Sub bar */
+.subbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 24px;
+  display: flex; align-items: center; gap: 16px;
+  flex-wrap: wrap;
+  position: sticky; top: 64px; z-index: 20;
+}
+.subbar h1 { font-family: var(--font-display); font-weight: 700; font-size: 28px; margin: 0; line-height: 1; letter-spacing: -.01em; }
+.subbar .crumb { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; margin-bottom: 6px; }
+.subbar .spacer { flex: 1; }
+
+.period-tabs { display: inline-flex; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 3px; }
+.period-tabs button,
+.period-tabs a {
+  border: 0;
+  background: transparent;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  border-radius: 6px;
+  letter-spacing: .02em;
+  text-decoration: none;
+  cursor: pointer;
+  display: inline-block;
+}
+.period-tabs button,
+.period-tabs a { transition: background .12s ease, color .12s ease, box-shadow .12s ease; }
+.period-tabs button.active,
+.period-tabs a.active {
+  background: var(--navy-700);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(27,168,212,.25);
+}
+.period-tabs a:hover:not(.active),
+.period-tabs button:hover:not(.active) {
+  background: var(--surface);
+  color: var(--ink);
+}
+.period-tabs a.active:hover { color: #fff; }
+
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 8px; font-weight: 700; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; border: 1px solid var(--border); background: var(--surface); color: var(--ink); transition: background .12s ease, border-color .12s ease, transform .12s ease, box-shadow .12s ease; }
+.btn:hover { background: var(--surface-2); border-color: var(--border-2); transform: translateY(-1px); box-shadow: 0 2px 6px rgba(10,37,64,.08); }
+.btn-primary { background: var(--cyan-600); border-color: var(--cyan-600); color: #fff; }
+.btn-primary:hover { background: var(--cyan-700); border-color: var(--cyan-700); }
+.btn-navy { background: var(--navy-700); border-color: var(--navy-700); color: #fff; }
+
+/* Layout */
+.page { max-width: 1640px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: minmax(0,1fr); gap: 20px; }
+.row { display: grid; gap: 20px; }
+.row.cols-2 { grid-template-columns: minmax(0,1fr) minmax(0,1fr); }
+.row.cols-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+.row.cols-4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+.row.cols-6 { grid-template-columns: repeat(6, minmax(0,1fr)); }
+.row.kpi-strip { grid-template-columns: repeat(6, minmax(0,1fr)); gap: 12px; }
+.row.split-2-1 { grid-template-columns: minmax(0,2fr) minmax(0,1fr); }
+.row.split-3-2 { grid-template-columns: minmax(0,3fr) minmax(0,2fr); }
+.row.split-1-2 { grid-template-columns: minmax(0,1fr) minmax(0,2fr); }
+
+/* Card */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; display: flex; flex-direction: column; }
+.card-h { display: flex; align-items: flex-start; justify-content: space-between; padding: 18px 20px 12px; gap: 12px; }
+.card-title { font-family: var(--font-display); font-weight: 700; font-size: 18px; margin: 0; line-height: 1.1; }
+.card-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.card-b { padding: 0 20px 20px; flex: 1; }
+
+/* KPI */
+.kpi { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 8px; min-height: 130px; }
+.kpi .kpi-label { display: flex; align-items: center; gap: 8px; }
+.kpi .kpi-label .ic { width: 22px; height: 22px; border-radius: 6px; background: var(--cyan-50); color: var(--cyan-700); display: grid; place-items: center; }
+.kpi .kpi-label span { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.kpi .kpi-value { font-family: var(--font-display); font-weight: 700; font-size: 34px; line-height: 1; letter-spacing: -.01em; }
+.kpi .kpi-value .unit { font-size: 17px; color: var(--muted); margin-left: 2px; font-weight: 600; }
+.kpi .kpi-foot { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.kpi .delta { font-weight: 700; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-variant-numeric: tabular-nums; }
+.delta.up   { color: var(--success); background: var(--success-bg); }
+.delta.down { color: var(--danger);  background: var(--danger-bg); }
+.delta.flat { color: var(--muted);   background: var(--bg); }
+.kpi.feature { background: linear-gradient(160deg, var(--navy-700), var(--navy-800)); color: #fff; border-color: var(--navy-700); }
+.kpi.feature .kpi-label span { color: rgba(255,255,255,.7); }
+.kpi.feature .kpi-foot { color: rgba(255,255,255,.65); }
+.kpi.feature .kpi-value .unit { color: rgba(255,255,255,.55); }
+
+/* Tables */
+table.flow { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.flow th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; padding: 10px 12px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+table.flow td { padding: 12px; border-bottom: 1px solid var(--divider); }
+table.flow tr:last-child td { border-bottom: 0; }
+table.flow td.num, table.flow th.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.flow tr:hover td { background: var(--surface-2); }
+
+.bar-track { position: relative; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+.bar-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--cyan-600); border-radius: 4px; }
+.bar-fill.navy { background: var(--navy-700); }
+
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; font-size: 11px; font-weight: 600; border-radius: 4px; background: var(--bg); color: var(--ink-2); text-transform: uppercase; letter-spacing: .04em; }
+.badge.cyan { background: var(--cyan-50); color: var(--cyan-700); }
+.badge.green { background: var(--success-bg); color: var(--success); }
+.badge.amber { background: var(--warn-bg); color: #B47A1F; }
+.badge.red { background: var(--danger-bg); color: var(--danger); }
+
+.muted { color: var(--muted); }
+.tiny { font-size: 11px; }
+
+.stack-h { display: flex; align-items: center; gap: 8px; }
+.stack-v { display: flex; flex-direction: column; gap: 4px; }
+
+@keyframes skeletonShimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ============================================================
+   Load-in / chart / hover animation suite
+   ============================================================ */
+
+/* Card + KPI fade-up on mount. One short fade for the whole page so tab
+   switches don't look like a wipe — the cascaded 280ms reveal was the
+   #1 complaint about navigation feel. */
+@keyframes cardEnter {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page > * {
+  animation: cardEnter .18s ease-out both;
+}
+
+/* KPI strip keeps a tight column stagger (≤180ms total) — adds polish
+   without delaying the eye reaching the numbers. */
+.row.kpi-strip > .kpi {
+  animation: cardEnter .25s ease-out both;
+}
+.row.kpi-strip > .kpi:nth-child(1) { animation-delay: 0s; }
+.row.kpi-strip > .kpi:nth-child(2) { animation-delay: .03s; }
+.row.kpi-strip > .kpi:nth-child(3) { animation-delay: .06s; }
+.row.kpi-strip > .kpi:nth-child(4) { animation-delay: .09s; }
+.row.kpi-strip > .kpi:nth-child(5) { animation-delay: .12s; }
+.row.kpi-strip > .kpi:nth-child(6) { animation-delay: .15s; }
+
+/* KPI hover: stronger lift + cyan-tinted border so the affordance is real */
+.kpi { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+.kpi:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(10,37,64,.12);
+  border-color: var(--cyan-300);
+}
+.kpi.feature:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(10,37,64,.22);
+  border-color: var(--cyan-500);
+}
+
+/* Card hover: lift + shadow, not just a border tint */
+.card { transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
+.card:hover {
+  border-color: var(--border-2);
+  box-shadow: 0 4px 16px rgba(10,37,64,.08);
+  transform: translateY(-1px);
+}
+
+/* SVG path draw-in for sparklines + area charts */
+@keyframes chartDraw {
+  from { stroke-dashoffset: var(--dash, 1200); }
+  to   { stroke-dashoffset: 0; }
+}
+.chart-draw {
+  stroke-dasharray: var(--dash, 1200);
+  stroke-dashoffset: var(--dash, 1200);
+  animation: chartDraw .6s cubic-bezier(.4, 0, .2, 1) forwards;
+}
+.chart-draw-fast {
+  stroke-dasharray: var(--dash, 600);
+  stroke-dashoffset: var(--dash, 600);
+  animation: chartDraw .8s cubic-bezier(.4, 0, .2, 1) forwards;
+}
+
+/* Donut slices: opacity fade-in with stagger.
+   We avoid animating `transform` because each slice already has an SVG
+   transform="rotate(-90 cx cy)" attribute that a CSS transform would clobber. */
+@keyframes donutSweep {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.donut-slice {
+  transition: filter .2s ease, stroke-width .2s ease;
+  cursor: pointer;
+}
+.donut-slice:hover {
+  filter: drop-shadow(0 2px 8px rgba(10,37,64,.22)) brightness(1.06);
+}
+
+/* Area-chart hover dots: invisible until hovered, then pop in */
+.area-dot {
+  opacity: 0;
+  transition: opacity .15s ease, r .15s ease;
+  cursor: pointer;
+}
+.area-dot:hover { opacity: 1; r: 5; }
+/* Show all dots on chart-wrap hover so the user knows they're interactive */
+.chart-wrap:hover .area-dot { opacity: .7; }
+.chart-wrap:hover .area-dot:hover { opacity: 1; }
+
+/* Number pop on enter — used for the KPI big values */
+@keyframes numberPop {
+  0%   { transform: scale(.85); opacity: 0; }
+  60%  { transform: scale(1.02); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.kpi-value { animation: numberPop .5s cubic-bezier(.34, 1.56, .64, 1) both; }
+
+/* Bar fills already have transition; make them animate from 0 on mount */
+@keyframes barGrow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.bar-fill {
+  transform-origin: left center;
+  animation: barGrow .8s cubic-bezier(.4, 0, .2, 1) both;
+}
+
+/* Table row hover lift — extend to tracker + daily variant */
+table.flow.tracker tbody tr,
+table.flow.tracker.daily tbody tr { transition: background .12s ease; }
+table.flow.tracker tbody tr:hover td,
+table.flow.tracker.daily tbody tr:hover td { background: var(--surface-2); }
+
+/* Smooth tab content swap when route changes (subbar + page refresh) */
+.subbar h1 { animation: cardEnter .3s ease-out both; }
+
+/* Respect users who don't want motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ============================================================
+   Marketing tracker tables — spreadsheet-style with target cells
+   Ported from the standalone reference. cell-good/warn/bad are
+   the threshold colour classes applied per-cell based on metric.
+   ============================================================ */
+table.flow.tracker th {
+  font-size: 10px;
+  padding: 8px 10px;
+  position: relative;
+  vertical-align: top;
+  background: var(--surface-2);
+}
+table.flow.tracker th.th-target {
+  background: linear-gradient(180deg, #FAD9DC, #fff);
+  color: var(--navy-800);
+  font-weight: 700;
+}
+table.flow.tracker th.th-target .th-sub {
+  font-size: 9px;
+  font-weight: 500;
+  text-transform: none;
+  color: var(--muted);
+  letter-spacing: 0;
+  margin-top: 2px;
+}
+table.flow.tracker td {
+  padding: 8px 10px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+table.flow.tracker.daily td {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+table.flow.tracker tr.row-emph td { background: var(--cyan-50); font-weight: 600; }
+table.flow.tracker tr.row-bad td { background: #FDEEEE; }
+table.flow.tracker tr.row-bad td.cell-bad { background: #F8D7DA; color: #B92F2D; }
+
+/* Threshold cell colours — apply to <td class="num cell-good"> etc. */
+td.cell-good {
+  background: #E5F4EC;
+  color: #0E7A4F;
+  font-weight: 700;
+}
+td.cell-warn {
+  background: #FBF1DC;
+  color: #B47A1F;
+  font-weight: 700;
+}
+td.cell-bad {
+  background: #FBE6E5;
+  color: #B92F2D;
+  font-weight: 700;
+}
+b.cell-good { background: #E5F4EC; color: #0E7A4F; padding: 2px 6px; border-radius: 4px; }
+b.cell-warn { background: #FBF1DC; color: #B47A1F; padding: 2px 6px; border-radius: 4px; }
+b.cell-bad  { background: #FBE6E5; color: #B92F2D; padding: 2px 6px; border-radius: 4px; }
+
+/* Sticky first column for the daily tracker */
+table.flow.tracker.daily tbody tr td:first-child {
+  background: var(--surface);
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+table.flow.tracker.daily tbody tr:hover td:first-child { background: var(--cyan-50); }
+table.flow.tracker.daily tr.row-bad td:first-child { background: #FDEEEE; }
+
+/* solid-navy badge variant for trailing-window labels */
+.badge.solid-navy { background: var(--navy-700); color: #fff; }
+.badge.solid-cyan { background: var(--cyan-600); color: #fff; }
+
+/* Filter / period control popovers should sit on top of sticky subbar */
+.popover {
+  position: absolute;
+  z-index: 40;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 6px;
+  min-width: 220px;
+  box-shadow: 0 4px 16px rgba(10,37,64,.18);
+}
+.popover-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 13px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.popover-item:hover { background: var(--surface-2); }
+.popover-item.active { background: var(--cyan-50); color: var(--cyan-700); font-weight: 600; }
+
+/* <details>-based dropdowns: hide the default disclosure triangle */
+details.dropdown { position: relative; }
+details.dropdown > summary {
+  list-style: none;
+  cursor: pointer;
+}
+details.dropdown > summary::-webkit-details-marker { display: none; }
+details.dropdown[open] > .popover { display: block; }
+details.dropdown > .popover { display: none; }
+
+/* LeadSourceDetail channel summary: hover + open-state chevron rotation */
+details > summary:hover { background: var(--surface-2) !important; }
+details[open] > summary .chevron { transform: rotate(90deg); }
+details > summary::-webkit-details-marker { display: none; }
+details > summary { -webkit-tap-highlight-color: transparent; }
