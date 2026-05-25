@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: flowpro-dashboard
+    runtime: node
+    plan: starter
+    region: singapore
+    buildCommand: npm ci && npm run build
+    startCommand: npx next start
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SIMPRO_TENANT
+        sync: false
+      - key: SIMPRO_CLIENT_ID
+        sync: false
+      - key: SIMPRO_CLIENT_SECRET
+        sync: false
+      - key: SIMPRO_USERNAME
+        sync: false
+      - key: SIMPRO_PASSWORD
+        sync: false
+      - key: SIMPRO_COMPANY_ID
+        value: "0"
+      - key: WC_API_TOKEN
+        sync: false
+      - key: WC_API_SECRET
+        sync: false
+      - key: WC_PROFILE_IDS
+        value: "144428,153888"
+      - key: OFFICE_ADDRESS
+        value: "Silverdale, Auckland, New Zealand"
+      - key: OFFICE_LAT
+        value: "-36.6203"
+      - key: OFFICE_LNG
+        value: "174.6707"
+      - key: CRON_SECRET
+        generateValue: true
