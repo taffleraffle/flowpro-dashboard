@@ -221,16 +221,25 @@ export default async function OverviewPage({
   );
 }
 
+const NULL_KPI = { value: null, prev: null, delta: null };
+const EMPTY_KPIS = { revenue: NULL_KPI, profit: NULL_KPI, margin: NULL_KPI, jobsDone: NULL_KPI, avgTicket: NULL_KPI, avgDistKm: NULL_KPI, quoteRate: NULL_KPI, leads: NULL_KPI };
+const EMPTY_SERIES = { dates: [] as string[], revenue: [] as number[], jobs: [] as number[], leads: [] as number[] };
+const EMPTY_FUNNEL = { impressions: null, leads: 0, quotesSent: 0, quotesWon: 0, costPerLead: null, costPerAcq: null };
+
+async function safe<T>(fn: () => Promise<T>, fallback: T): Promise<T> {
+  try { return await fn(); } catch { return fallback; }
+}
+
 function loadPageData(window: { startDate: string; endDate: string }) {
   return Promise.all([
-    getOverviewKpis(window),
-    getDailySeries(window),
-    getAcquisition(window),
-    getFunnel(window),
-    getServiceCategories(window),
-    getRecentSyncRuns(8),
-    getSuburbDistribution(),
-    getActiveErrors(),
+    safe(() => getOverviewKpis(window), EMPTY_KPIS),
+    safe(() => getDailySeries(window), EMPTY_SERIES),
+    safe(() => getAcquisition(window), []),
+    safe(() => getFunnel(window), EMPTY_FUNNEL),
+    safe(() => getServiceCategories(window), []),
+    safe(() => getRecentSyncRuns(8), []),
+    safe(() => getSuburbDistribution(), []),
+    safe(() => getActiveErrors(), []),
   ]);
 }
 
