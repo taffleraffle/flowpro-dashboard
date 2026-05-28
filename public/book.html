@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Flowpro · Book Your Job</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0D3556; --navy-deep:#061B30; --navy-2:#134268;
+  --cyan:#2BBDE6; --cyan-deep:#0F8CB8; --cyan-soft:#E8F4F9; --cyan-soft2:#C8EAF3;
+  --bg:#F5F8FA; --surface:#FFFFFF; --border:#E1E7ED; --divider:#ECF0F3;
+  --ink:#0A2540; --muted:#6B7A88; --muted-2:#93A1AE;
+  --success:#15A36A; --success-bg:#E5F4EC; --success-ink:#0E7A4F;
+  --warn:#E8A93C; --warn-bg:#FBF1DC; --warn-ink:#B47A1F;
+  --danger:#D14543; --danger-bg:#FBE6E5; --danger-ink:#B92F2D;
+  --radius:15px; --radius-sm:11px;
+  --shadow-card:0 1px 2px rgba(13,53,86,.04), 0 5px 18px rgba(13,53,86,.06);
+  --shadow-pop:0 10px 40px rgba(6,27,48,.28);
+  --display:"Barlow Condensed", system-ui, sans-serif;
+  --body:"Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:var(--body); color:var(--ink);
+  background:radial-gradient(1200px 600px at 50% -10%, #13456e 0%, transparent 60%), linear-gradient(160deg,#0D3556 0%, #07233c 100%);
+  min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px 14px; overflow-x:hidden;
+}
+.phone{
+  width:100%; max-width:412px; height:min(860px, calc(100vh - 48px));
+  background:var(--bg); border-radius:34px; position:relative; overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.06), 0 0 0 10px rgba(255,255,255,.03);
+  display:flex; flex-direction:column;
+}
+@media (max-width:480px){ body{padding:0} .phone{max-width:none; height:100vh; height:100dvh; border-radius:0} }
+
+/* ===== Header (white, real logo) ===== */
+.appbar{background:var(--surface); border-bottom:1px solid var(--border); padding:12px 18px;
+  display:flex; align-items:center; justify-content:space-between; flex:0 0 auto; z-index:5}
+.appbar img{height:26px; width:auto; display:block}
+.appbar .logo-fallback{font-family:var(--display); font-weight:800; font-size:21px; color:var(--navy); letter-spacing:-.4px}
+.appbar .logo-fallback b{color:var(--cyan-deep)}
+.secure{display:flex; align-items:center; gap:5px; font-size:10.5px; font-weight:600; color:var(--muted);
+  background:var(--bg); border:1px solid var(--border); padding:5px 10px; border-radius:999px}
+.secure svg{width:12px;height:12px; color:var(--success)}
+
+/* ===== Progress ===== */
+.progress-wrap{background:var(--surface); border-bottom:1px solid var(--border); padding:11px 18px 12px; flex:0 0 auto}
+.progress-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:9px}
+.step-count{font-family:var(--display); font-weight:700; font-size:12px; letter-spacing:1.4px; text-transform:uppercase; color:var(--navy)}
+.step-count span{color:var(--cyan-deep)}
+.step-name{font-size:11.5px; font-weight:600; color:var(--muted)}
+.bar{height:5px; background:var(--divider); border-radius:999px; overflow:hidden}
+.bar-fill{height:100%; width:33.33%; border-radius:999px; background:linear-gradient(90deg,var(--cyan),var(--cyan-deep)); transition:width .55s cubic-bezier(.65,.05,.36,1)}
+.dots{display:flex; justify-content:space-between; margin-top:9px}
+.dot{display:flex; align-items:center; gap:7px}
+.dot .pip{width:22px;height:22px;border-radius:50%; background:var(--divider); color:var(--muted-2);
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:11px; border:2px solid var(--divider); transition:.35s}
+.dot .lbl{font-size:11px; font-weight:600; color:var(--muted-2); transition:.3s}
+.dot.active .pip{background:var(--navy); border-color:var(--navy); color:#fff}
+.dot.active .lbl{color:var(--navy)}
+.dot.done .pip{background:var(--success); border-color:var(--success); color:#fff}
+.dot.done .lbl{color:var(--success-ink)}
+.dot .pip svg{width:13px;height:13px}
+.pip-check{animation:pop .35s cubic-bezier(.2,1.4,.5,1)}
+@keyframes pop{0%{transform:scale(.2);opacity:0}100%{transform:scale(1);opacity:1}}
+
+/* ===== Slides ===== */
+.scroll{flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch; position:relative}
+.slide{padding:18px 18px 16px; display:none; animation:slideIn .4s cubic-bezier(.2,.7,.3,1)}
+.slide.show{display:block}
+.slide.back{animation:slideInBack .4s cubic-bezier(.2,.7,.3,1)}
+@keyframes slideIn{from{opacity:0; transform:translateX(30px)}to{opacity:1; transform:translateX(0)}}
+@keyframes slideInBack{from{opacity:0; transform:translateX(-30px)}to{opacity:1; transform:translateX(0)}}
+
+.eyebrow{font-family:var(--display); font-weight:700; font-size:11px; letter-spacing:1.8px; text-transform:uppercase; color:var(--cyan-deep); margin-bottom:3px}
+h1.title{font-family:var(--display); font-weight:800; font-size:26px; line-height:1.02; letter-spacing:-.2px; color:var(--navy); text-transform:uppercase}
+.rule{height:3px; width:46px; background:linear-gradient(90deg,var(--cyan),var(--cyan-deep)); border-radius:3px; margin:9px 0 0}
+.lead{font-size:13px; color:var(--muted); line-height:1.45; margin:9px 0 16px; max-width:36ch}
+
+/* ===== Fields ===== */
+.field{margin-bottom:11px}
+.row2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.field label{display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; color:var(--ink); margin-bottom:6px}
+.field label .req{color:var(--cyan-deep)}
+.field label svg{width:13px;height:13px; color:var(--muted)}
+.input{width:100%; font-family:var(--body); font-size:15px; color:var(--ink); background:var(--surface);
+  border:1.5px solid var(--border); border-radius:var(--radius-sm); padding:13px 13px; transition:.18s; outline:none}
+.input::placeholder{color:var(--muted-2)}
+.input:focus{border-color:var(--cyan); box-shadow:0 0 0 4px rgba(43,189,230,.14)}
+.input.ok{border-color:var(--success)}
+.input.err{border-color:var(--danger); background:var(--danger-bg)}
+textarea.input{resize:none; min-height:84px; line-height:1.5}
+.err-msg{display:none; align-items:center; gap:5px; font-size:11px; color:var(--danger-ink); margin-top:5px; font-weight:500}
+.err-msg svg{width:11px;height:11px}
+.field.invalid .err-msg{display:flex}
+
+/* ===== Address search ===== */
+.search-wrap{position:relative}
+.search-ic{position:absolute; left:13px; top:50%; transform:translateY(-50%); width:16px;height:16px; color:var(--muted-2); pointer-events:none}
+.search-wrap .input{padding-left:38px}
+.suggest{position:absolute; left:0; right:0; top:calc(100% + 6px); background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; box-shadow:var(--shadow-pop); overflow:hidden; z-index:20; display:none}
+.suggest.show{display:block; animation:pop .18s}
+.sg{display:flex; align-items:center; gap:10px; padding:11px 13px; cursor:pointer; border-bottom:1px solid var(--divider)}
+.sg:last-child{border-bottom:none}
+.sg:hover,.sg.hl{background:var(--cyan-soft)}
+.sg .pin{width:30px;height:30px;flex:0 0 auto; border-radius:8px; background:var(--cyan-soft); color:var(--cyan-deep); display:flex; align-items:center; justify-content:center}
+.sg .pin svg{width:15px;height:15px}
+.sg .txt{line-height:1.25; overflow:hidden}
+.sg .txt b{font-size:13px; font-weight:600; color:var(--ink); display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.sg .txt small{font-size:11px; color:var(--muted)}
+.sg.manual{color:var(--cyan-deep); font-weight:600; font-size:12.5px; justify-content:center; gap:6px}
+.sg.manual svg{width:14px;height:14px}
+
+/* ===== Chips ===== */
+.blk-label{display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; color:var(--ink); margin:14px 0 8px}
+.blk-label:first-of-type{margin-top:4px}
+.blk-label .req{color:var(--cyan-deep)}
+.blk-label svg{width:13px;height:13px;color:var(--muted)}
+.chips{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px}
+.chip{display:flex; flex-direction:column; align-items:center; gap:6px; background:var(--surface); border:1.5px solid var(--border);
+  border-radius:var(--radius-sm); padding:11px 6px; cursor:pointer; transition:.16s; text-align:center}
+.chip:active{transform:scale(.96)}
+.chip .ci{width:30px;height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; background:var(--cyan-soft); color:var(--cyan-deep)}
+.chip .ci svg{width:17px;height:17px}
+.chip b{font-size:11.5px; font-weight:600; color:var(--ink); line-height:1.1}
+.chip.sel{border-color:var(--cyan); background:var(--cyan-soft); box-shadow:0 0 0 3px rgba(43,189,230,.12)}
+.chip.sel .ci{background:var(--navy); color:#fff}
+
+/* segmented */
+.seg{display:flex; background:var(--divider); border-radius:11px; padding:4px; gap:4px}
+.seg button{flex:1; font-family:var(--body); font-size:12px; font-weight:600; color:var(--muted); background:none; border:none;
+  padding:9px 4px; border-radius:8px; cursor:pointer; transition:.2s; display:flex; align-items:center; justify-content:center; gap:5px}
+.seg button svg{width:14px;height:14px}
+.seg button.on{background:var(--navy); color:#fff; box-shadow:0 3px 10px rgba(13,53,86,.22)}
+
+/* photos */
+.photo-bar{display:flex; align-items:center; gap:12px; border:1.5px dashed var(--cyan-soft2); background:var(--cyan-soft);
+  border-radius:var(--radius-sm); padding:12px 14px; cursor:pointer; transition:.18s}
+.photo-bar:active{transform:scale(.99)}
+.photo-bar.drag{border-color:var(--cyan); background:#dff1f9}
+.photo-bar .pic{width:38px;height:38px;flex:0 0 auto; border-radius:9px; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow-card)}
+.photo-bar .pic svg{width:20px;height:20px; color:var(--cyan-deep)}
+.photo-bar .pt{line-height:1.25}
+.photo-bar .pt b{font-size:13px; font-weight:600; color:var(--navy); display:block}
+.photo-bar .pt small{font-size:11px; color:var(--muted)}
+.thumbs{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:9px}
+.thumb{position:relative; aspect-ratio:1; border-radius:10px; overflow:hidden; background:var(--divider); border:1px solid var(--border); animation:pop .3s}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb .rm{position:absolute; top:4px; right:4px; width:22px;height:22px; border-radius:50%; background:rgba(6,27,48,.78); border:none; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center}
+.thumb .rm svg{width:12px;height:12px}
+
+/* ===== Confirm step ===== */
+.recap{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:13px 14px; margin-bottom:13px}
+.recap h4{font-family:var(--display); font-weight:700; font-size:12px; letter-spacing:1.3px; text-transform:uppercase; color:var(--navy); margin-bottom:8px; display:flex; align-items:center; gap:6px}
+.recap h4 svg{width:13px;height:13px;color:var(--cyan-deep)}
+.recap .rrow{display:flex; gap:10px; font-size:12.5px; padding:4px 0; color:var(--ink)}
+.recap .rrow span{color:var(--muted); min-width:58px; font-weight:500}
+.recap .rrow b{font-weight:600; flex:1}
+.rate-card{background:linear-gradient(165deg,#0D3556,#0A2C49); border-radius:var(--radius); padding:16px 16px; color:#fff; box-shadow:var(--shadow-card); margin-bottom:12px}
+.rate-card .rc-eyebrow{font-family:var(--display); font-weight:700; letter-spacing:1.8px; font-size:10.5px; color:var(--cyan); text-transform:uppercase}
+.rate-card h3{font-family:var(--display); font-weight:800; font-size:19px; text-transform:uppercase; margin:2px 0 11px}
+.rate-row{display:flex; justify-content:space-between; align-items:baseline; padding:9px 0; border-top:1px solid rgba(255,255,255,.1)}
+.rate-row:first-of-type{border-top:none}
+.rate-row .rl b{font-size:13px; font-weight:600; display:block}
+.rate-row .rl small{font-size:10.5px; color:#9FC6DD}
+.rate-row .rv{font-family:var(--display); font-weight:800; font-size:21px}
+.rate-row .rv small{font-size:10.5px; font-weight:600; color:#9FC6DD; font-family:var(--body)}
+.trust{display:grid; gap:7px}
+.trust .ti{display:flex; align-items:center; gap:9px; font-size:12px; color:var(--ink); font-weight:500}
+.trust .ti svg{width:16px;height:16px; color:var(--success); flex:0 0 auto}
+
+/* ===== Footer ===== */
+.footer{flex:0 0 auto; background:var(--surface); border-top:1px solid var(--border); padding:12px 18px 15px; display:flex; flex-direction:column; gap:8px}
+.btn{font-family:var(--body); font-weight:700; font-size:15px; border:none; border-radius:12px; padding:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:.16s; width:100%}
+.btn:active{transform:scale(.98)}
+.btn svg{width:18px;height:18px}
+.btn-primary{background:linear-gradient(180deg,var(--cyan),var(--cyan-deep)); color:#fff; box-shadow:0 6px 16px rgba(15,140,184,.32)}
+.btn-primary:disabled{background:var(--divider); color:var(--muted-2); box-shadow:none; cursor:not-allowed}
+.btn-ghost{background:none; color:var(--muted); font-weight:600; font-size:13px; padding:6px}
+.btn-row{display:flex; gap:10px}
+.btn-row .btn{flex:1}
+.btn-back{flex:0 0 auto; width:52px; background:var(--divider); color:var(--navy)}
+.disabled-why{display:none; font-size:11px; color:var(--warn-ink); background:var(--warn-bg); border:1px solid #f0dcb0; padding:7px 11px; border-radius:9px; text-align:center; font-weight:500}
+.disabled-why.show{display:block}
+.foot-trust{display:flex; align-items:center; justify-content:center; gap:6px; font-size:10px; color:var(--muted-2); font-weight:500}
+.foot-trust svg{width:11px;height:11px}
+
+/* ===== Sheets ===== */
+.scrim{position:absolute; inset:0; background:rgba(6,27,48,.55); backdrop-filter:blur(2px); opacity:0; pointer-events:none; transition:opacity .3s; z-index:40}
+.scrim.show{opacity:1; pointer-events:auto}
+.sheet{position:absolute; left:0; right:0; bottom:0; background:var(--surface); border-radius:22px 22px 0 0; padding:8px 20px 20px;
+  transform:translateY(110%); transition:transform .4s cubic-bezier(.2,.8,.25,1); z-index:50; max-height:90%; display:flex; flex-direction:column; box-shadow:var(--shadow-pop)}
+.sheet.show{transform:translateY(0)}
+.grip{width:40px;height:5px; background:var(--border); border-radius:99px; margin:6px auto 12px; flex:0 0 auto}
+.sheet-ic{width:48px;height:48px; border-radius:13px; display:flex; align-items:center; justify-content:center; margin-bottom:11px; flex:0 0 auto}
+.sheet-ic svg{width:24px;height:24px}
+.sheet h2{font-family:var(--display); font-weight:800; font-size:23px; text-transform:uppercase; color:var(--navy); line-height:1.04}
+.sheet .sub{font-size:12.5px; color:var(--muted); margin-top:7px; line-height:1.5}
+.sheet-scroll{overflow-y:auto; margin:12px -4px 4px; padding:0 4px}
+.confirm-rates{background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:4px 14px; margin:14px 0}
+.confirm-rates .cr{display:flex; justify-content:space-between; padding:9px 0; border-top:1px solid var(--divider); font-size:12.5px}
+.confirm-rates .cr:first-child{border-top:none}
+.confirm-rates .cr b{font-family:var(--display); font-weight:700; font-size:15px; color:var(--navy)}
+.tnc{font-size:12px; color:var(--muted); line-height:1.55}
+.tnc h5{font-size:12px; font-weight:700; color:var(--ink); margin:11px 0 3px}
+.tnc h5:first-child{margin-top:0}
+.agree-box{display:flex; align-items:flex-start; gap:10px; background:var(--cyan-soft); border:1.5px solid var(--cyan-soft2); border-radius:11px; padding:12px; margin:14px 0 2px; cursor:pointer; transition:.18s}
+.agree-box.checked{border-color:var(--cyan); background:#dff1f9}
+.cbx{width:22px;height:22px; border-radius:6px; border:2px solid var(--muted-2); background:#fff; flex:0 0 auto; display:flex; align-items:center; justify-content:center; transition:.18s}
+.cbx svg{width:14px;height:14px; color:#fff; opacity:0; transform:scale(.4); transition:.18s}
+.agree-box.checked .cbx{background:var(--cyan-deep); border-color:var(--cyan-deep)}
+.agree-box.checked .cbx svg{opacity:1; transform:scale(1)}
+.agree-box p{font-size:12.5px; color:var(--ink); font-weight:500; line-height:1.4}
+
+/* ===== Success ===== */
+.success{position:absolute; inset:0; background:linear-gradient(170deg,#0D3556,#07233c); color:#fff; z-index:60; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:30px 26px; opacity:0; pointer-events:none; transition:opacity .4s}
+.success.show{opacity:1; pointer-events:auto}
+.check-ring{position:relative; width:96px;height:96px; border-radius:50%; background:rgba(43,189,230,.14); border:2px solid rgba(43,189,230,.4); display:flex; align-items:center; justify-content:center; margin-bottom:20px}
+.check-ring .pulse{position:absolute; inset:-2px; border-radius:50%; border:2px solid rgba(43,189,230,.55); animation:pulse 2.2s cubic-bezier(.3,.5,.3,1) infinite; pointer-events:none}
+.check-ring .pulse.p2{animation-delay:1.1s}
+@keyframes pulse{0%{transform:scale(.85);opacity:.75}70%{opacity:0}100%{transform:scale(2.1);opacity:0}}
+.check-disc{width:68px;height:68px; border-radius:50%; background:linear-gradient(160deg,var(--success),#0c8a59); display:flex; align-items:center; justify-content:center; box-shadow:0 8px 24px rgba(21,163,106,.5)}
+.check-disc svg{width:36px;height:36px}
+.check-disc svg path{stroke-dasharray:48; stroke-dashoffset:48; animation:draw .5s .25s forwards cubic-bezier(.6,0,.3,1)}
+@keyframes draw{to{stroke-dashoffset:0}}
+.success h2{font-family:var(--display); font-weight:800; font-size:32px; text-transform:uppercase; line-height:1.02}
+.success .booked-sub{font-size:13.5px; color:#A9CDE2; margin-top:11px; line-height:1.5; max-width:30ch}
+.ref{display:inline-flex; align-items:center; gap:8px; margin-top:18px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16); padding:10px 18px; border-radius:12px}
+.ref small{font-size:9.5px; letter-spacing:1.4px; color:#7FB7D6; text-transform:uppercase; font-weight:700}
+.ref b{font-family:var(--display); font-weight:800; font-size:18px; letter-spacing:1px}
+.next-steps{margin-top:20px; width:100%; max-width:290px; text-align:left; display:grid; gap:9px}
+.next-steps .ns{display:flex; align-items:center; gap:11px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:11px; padding:11px 13px}
+.next-steps .ns .n{width:24px;height:24px; border-radius:50%; background:var(--cyan); color:var(--navy-deep); font-weight:800; font-family:var(--display); font-size:13px; display:flex; align-items:center; justify-content:center; flex:0 0 auto}
+.next-steps .ns p{font-size:12px; color:#dCEAF3; line-height:1.3}
+.next-steps .ns p b{color:#fff; font-weight:600}
+.sync{display:flex; align-items:center; gap:8px; margin-top:18px; font-size:11px; color:#7FB7D6; font-weight:500}
+.sync svg{width:13px;height:13px; color:var(--success)}
+
+/* ===== T&C as a written document ===== */
+.sheet-doc{background:var(--bg); padding:8px 0 0; height:93%}
+.doc-scroll{flex:1 1 auto; overflow-y:auto; padding:2px 16px 16px}
+.paper{background:#fff; border:1px solid var(--border); border-radius:10px; box-shadow:0 8px 30px rgba(6,27,48,.12); padding:22px 20px}
+.paper-head{display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding-bottom:11px; border-bottom:2px solid var(--navy)}
+.paper-head img{height:24px; width:auto}
+.paper-co{font-size:8.5px; color:var(--muted); text-align:right; line-height:1.5; font-weight:500}
+.paper-title{font-family:var(--display); font-weight:800; font-size:23px; text-transform:uppercase; color:var(--navy); letter-spacing:.4px; margin-top:14px}
+.paper-meta{display:flex; justify-content:space-between; gap:10px; font-size:10px; color:var(--muted); font-family:ui-monospace,Menlo,Consolas,monospace; margin:5px 0 13px; padding-bottom:12px; border-bottom:1px solid var(--divider)}
+.paper-meta b{color:var(--ink); font-weight:600}
+.paper-body{font-family:Georgia,"Times New Roman",serif; font-size:12.5px; color:#33404D; line-height:1.62}
+.paper-body h6{font-family:var(--body); font-size:12px; font-weight:700; color:var(--navy); margin:13px 0 3px}
+.paper-body h6:first-child{margin-top:0}
+.paper-body p{margin:0}
+.paper-sign{margin-top:16px; padding-top:12px; border-top:1px solid var(--divider); font-family:Georgia,serif; font-size:11px; color:var(--muted-2); font-style:italic}
+.doc-foot{flex:0 0 auto; background:var(--surface); border-top:1px solid var(--border); padding:11px 18px 15px; box-shadow:0 -6px 18px rgba(6,27,48,.06)}
+
+.toast-wrap{position:absolute; top:12px; left:0; right:0; display:flex; justify-content:center; z-index:70; pointer-events:none}
+.toast{background:var(--navy); color:#fff; font-size:12.5px; font-weight:600; padding:10px 16px; border-radius:11px; display:flex; align-items:center; gap:9px; box-shadow:var(--shadow-pop); transform:translateY(-80px); opacity:0; transition:.35s}
+.toast.show{transform:translateY(0); opacity:1}
+.toast svg{width:15px;height:15px; color:var(--cyan)}
+.spin{width:18px;height:18px; border:2.5px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:rot .7s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div class="phone" id="phone">
+
+  <!-- Header with REAL Flowpro logo (sits beside this file in Downloads) -->
+  <div class="appbar">
+    <img src="flowpro-logo-new-1.svg" alt="Flowpro Plumbers & Gasfitters"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <div class="logo-fallback" style="display:none">flow<b>pro</b></div>
+    <div class="secure">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Secure
+    </div>
+  </div>
+
+  <!-- Progress (3 steps) -->
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <div class="step-count">STEP <span id="stepNum">1</span> OF 3</div>
+      <div class="step-name" id="stepName">Your details</div>
+    </div>
+    <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    <div class="dots" id="dots">
+      <div class="dot active" data-step="1"><div class="pip">1</div><div class="lbl">Details</div></div>
+      <div class="dot" data-step="2"><div class="pip">2</div><div class="lbl">The job</div></div>
+      <div class="dot" data-step="3"><div class="pip">3</div><div class="lbl">Confirm</div></div>
+    </div>
+  </div>
+
+  <div class="scroll" id="scroll">
+
+    <!-- STEP 1 — Details -->
+    <section class="slide show" id="s1">
+      <div class="eyebrow">Let's get started</div>
+      <h1 class="title">Your details</h1>
+      <div class="rule"></div>
+      <p class="lead">Pop your details in and we'll get a Flowpro plumber booked to your job.</p>
+
+      <div class="field" id="f-name">
+        <label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Full name <span class="req">*</span></label>
+        <input class="input" id="i-name" type="text" placeholder="Sarah Thompson" autocomplete="name">
+        <div class="err-msg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg> Please enter your name</div>
+      </div>
+
+      <div class="row2">
+        <div class="field" id="f-phone">
+          <label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z"/></svg> Mobile <span class="req">*</span></label>
+          <input class="input" id="i-phone" type="tel" placeholder="021 234 5678" autocomplete="tel">
+          <div class="err-msg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg> Valid number needed</div>
+        </div>
+        <div class="field" id="f-email">
+          <label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg> Email <span class="req">*</span></label>
+          <input class="input" id="i-email" type="email" placeholder="you@email.com" autocomplete="email">
+          <div class="err-msg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg> Valid email needed</div>
+        </div>
+      </div>
+
+      <div class="field" id="f-address">
+        <label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg> Job site address <span class="req">*</span></label>
+        <div class="search-wrap">
+          <svg class="search-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input class="input" id="i-address" type="text" placeholder="Start typing your address…" autocomplete="off">
+          <div class="suggest" id="suggest"></div>
+        </div>
+        <div class="err-msg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg> Search and select the job address</div>
+      </div>
+    </section>
+
+    <!-- STEP 2 — The job (+ photos merged) -->
+    <section class="slide" id="s2">
+      <div class="eyebrow">Tell us what's going on</div>
+      <h1 class="title">The job</h1>
+      <div class="rule"></div>
+      <p class="lead">A few quick details so we come prepared.</p>
+
+      <div class="blk-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg> What do you need? <span class="req">*</span></div>
+      <div class="chips" id="svcChips">
+        <div class="chip" data-svc="Plumbing"><div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h6v4a3 3 0 0 0 3 3 3 3 0 0 0 3-3V5h4"/><path d="M3 4v6M21 3v6"/></svg></div><b>Plumbing</b></div>
+        <div class="chip" data-svc="Gasfitting"><div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2s5 5 5 10a5 5 0 0 1-10 0c0-2 1-4 2.5-5.5"/></svg></div><b>Gasfitting</b></div>
+        <div class="chip" data-svc="Hot Water"><div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22a7 7 0 0 0 7-7c0-5-7-13-7-13S5 10 5 15a7 7 0 0 0 7 7Z"/></svg></div><b>Hot Water</b></div>
+        <div class="chip" data-svc="Drainage"><div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18"/></svg></div><b>Drainage</b></div>
+        <div class="chip" data-svc="Emergency"><div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></div><b>Emergency</b></div>
+        <div class="chip" data-svc="Not sure"><div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></div><b>Not sure</b></div>
+      </div>
+
+      <div class="blk-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> How urgent is it?</div>
+      <div class="seg" id="urgency">
+        <button data-urg="Emergency" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg>ASAP</button>
+        <button data-urg="This week"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>This week</button>
+        <button data-urg="Flexible"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>Flexible</button>
+      </div>
+
+      <div class="field" style="margin-top:14px" id="f-desc">
+        <label><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg> Describe the problem <span class="req">*</span></label>
+        <textarea class="input" id="i-desc" placeholder="e.g. Kitchen tap won't stop dripping and the cupboard underneath is damp."></textarea>
+        <div class="err-msg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg> A quick description helps us come prepared</div>
+      </div>
+
+      <div class="blk-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3"/></svg> Add photos <span style="color:var(--muted-2);font-weight:500">(optional)</span></div>
+      <input type="file" id="fileInput" accept="image/*" multiple capture="environment" hidden>
+      <div class="photo-bar" id="dropzone">
+        <div class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
+        <div class="pt"><b>Tap to add photos</b><small>Faster, more accurate quote</small></div>
+      </div>
+      <div class="thumbs" id="thumbs"></div>
+    </section>
+
+    <!-- STEP 3 — Confirm -->
+    <section class="slide" id="s3">
+      <div class="eyebrow">Last step</div>
+      <h1 class="title">Confirm &amp; book</h1>
+      <div class="rule"></div>
+      <p class="lead">Quick check everything's right, then book in — we'll take care of the rest.</p>
+
+      <div class="recap" id="recap">
+        <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Your booking</h4>
+        <div class="rrow"><span>Name</span><b id="r-name">—</b></div>
+        <div class="rrow"><span>Address</span><b id="r-address">—</b></div>
+        <div class="rrow"><span>Job</span><b id="r-job">—</b></div>
+        <div class="rrow"><span>Urgency</span><b id="r-urg">—</b></div>
+        <div class="rrow"><span>Photos</span><b id="r-photos">—</b></div>
+      </div>
+
+      <div class="trust">
+        <div class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> No fix, no call-out fee</div>
+        <div class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Upfront price before major work</div>
+        <div class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Licensed, insured &amp; guaranteed</div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="disabled-why" id="why"></div>
+    <div class="btn-row">
+      <button class="btn btn-back" id="backBtn" style="display:none" aria-label="Go back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m15 18-6-6 6-6"/></svg></button>
+      <button class="btn btn-primary" id="nextBtn"><span id="nextLabel">Continue</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </div>
+    <div class="foot-trust"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Encrypted &amp; never shared</div>
+  </div>
+
+  <!-- Sheets -->
+  <div class="scrim" id="scrim"></div>
+
+  <div class="sheet sheet-doc" id="sheetTnc">
+    <div class="grip"></div>
+    <div class="doc-scroll">
+      <div class="paper">
+        <div class="paper-head">
+          <img src="flowpro-logo-new-1.svg" alt="Flowpro" onerror="this.style.display='none'">
+          <div class="paper-co">Flowpro Plumbers &amp; Gasfitters<br>Orewa, Auckland · 0800 FLOWPRO<br>Licensed Plumbers, Gasfitters &amp; Drainlayers</div>
+        </div>
+        <div class="paper-title">Service Agreement</div>
+        <div class="paper-meta"><span>Prepared for <b id="doc-name">—</b></span><span id="doc-date">—</span></div>
+        <div class="paper-body">
+          <h6>1. Booking &amp; attendance</h6>
+          <p>By confirming this agreement you request that Flowpro attend the address you have provided to assess and, where possible, complete the work described. We will contact you to confirm an appointment time. A call-out fee applies once a plumber has been dispatched.</p>
+          <h6>2. Pricing</h6>
+          <p>Our standard rates are a call-out fee of $89 + GST (which includes the first 30 minutes on site), labour thereafter at $120 per hour charged in 15-minute blocks, and after-hours or emergency work at $160 per hour. Parts and materials are additional and itemised. You will be advised of the price before any major work begins.</p>
+          <h6>3. No fix, no call-out fee</h6>
+          <p>If we attend and are genuinely unable to assist with the issue, the call-out fee is waived. This does not apply where site access is not provided or a confirmed appointment is missed.</p>
+          <h6>4. Cancellations</h6>
+          <p>Please give us at least two hours' notice to cancel or reschedule. Missed appointments may incur the call-out fee.</p>
+          <h6>5. Workmanship &amp; privacy</h6>
+          <p>All work is guaranteed and carried out by licensed, insured tradespeople in accordance with New Zealand regulations. The details you provide are used solely to deliver and follow up on your job, and are never sold or shared with third parties.</p>
+          <div class="paper-sign">Flowpro Plumbers &amp; Gasfitters — committed to honest, guaranteed workmanship.</div>
+        </div>
+      </div>
+    </div>
+    <div class="doc-foot">
+      <div class="agree-box" id="agreeBox" style="margin:0 0 10px">
+        <div class="cbx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+        <p>I've read and agree to the terms of service.</p>
+      </div>
+      <button class="btn btn-primary" id="tncConfirm" disabled><span id="tncLabel">Confirm booking</span></button>
+    </div>
+  </div>
+
+  <!-- Success -->
+  <div class="success" id="success">
+    <div class="check-ring"><span class="pulse"></span><span class="pulse p2"></span><div class="check-disc"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div></div>
+    <h2>You're booked!</h2>
+    <p class="booked-sub">Nice one, <span id="suc-name">there</span>. Your job's locked in and our team has it — we'll be in touch shortly.</p>
+    <div class="ref"><small>Booking ref</small><b id="ref">FP-00000</b></div>
+    <div class="next-steps">
+      <div class="ns"><div class="n">1</div><p><b>We'll call you</b> to confirm your slot</p></div>
+      <div class="ns"><div class="n">2</div><p>Your plumber arrives <b>with the right gear</b></p></div>
+      <div class="ns"><div class="n">3</div><p><b>Upfront price</b> before any major work</p></div>
+    </div>
+    <div class="sync"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg> Job synced to Simpro · job card created</div>
+  </div>
+
+  <div class="toast-wrap"><div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg><span id="toastMsg"></span></div></div>
+
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const state = { step:1, svc:null, urgency:'Emergency', photos:[], addressPicked:false };
+const stepNames = ['Your details','The job','Confirm & book'];
+const MAX = 3;
+
+let toastT;
+function toast(msg){ $('#toastMsg').textContent=msg; $('#toast').classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>$('#toast').classList.remove('show'),2200); }
+
+/* ---------- Navigation ---------- */
+function renderStep(dir){
+  $$('.slide').forEach(s=>s.classList.remove('show','back'));
+  const slide=$('#s'+state.step); slide.classList.add('show'); if(dir==='back') slide.classList.add('back');
+  $('#scroll').scrollTop=0;
+  $('#stepNum').textContent=state.step;
+  $('#stepName').textContent=stepNames[state.step-1];
+  $('#barFill').style.width=(state.step*(100/MAX))+'%';
+  $$('#dots .dot').forEach(d=>{
+    const n=+d.dataset.step;
+    d.classList.toggle('active',n===state.step);
+    d.classList.toggle('done',n<state.step);
+    const pip=d.querySelector('.pip');
+    pip.innerHTML = n<state.step ? '<svg class="pip-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>' : n;
+  });
+  $('#backBtn').style.display=state.step>1?'flex':'none';
+  $('#nextLabel').textContent = state.step===MAX ? 'Book in' : 'Continue';
+  if(state.step===MAX) buildRecap();
+  validateStep();
+}
+function goNext(){
+  if(state.step===MAX){ buildDoc(); openSheet('sheetTnc'); return; }
+  if(!stepValid()){ flashErrors(); return; }
+  state.step++; renderStep('fwd');
+}
+function goBack(){ if(state.step>1){ state.step--; renderStep('back'); } }
+$('#nextBtn').addEventListener('click',goNext);
+$('#backBtn').addEventListener('click',goBack);
+
+/* ---------- Validation ---------- */
+const emailOk=v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+const phoneOk=v=>v.replace(/\D/g,'').length>=8;
+function stepValid(){
+  if(state.step===1) return $('#i-name').value.trim() && phoneOk($('#i-phone').value) && emailOk($('#i-email').value) && $('#i-address').value.trim();
+  if(state.step===2) return state.svc && $('#i-desc').value.trim().length>=3;
+  return true;
+}
+function validateStep(){
+  const ok=stepValid(); $('#nextBtn').disabled=!ok; const why=$('#why');
+  if(ok){ why.classList.remove('show'); return; }
+  let msg='';
+  if(state.step===1) msg='Fill in your name, mobile, email and address to continue';
+  if(state.step===2) msg=state.svc ? 'Add a quick description of the problem' : 'Pick what you need help with first';
+  why.textContent=msg; why.classList.add('show');
+}
+function markField(id,valid){ const f=$(id),inp=f.querySelector('.input'); f.classList.toggle('invalid',!valid); inp.classList.toggle('err',!valid); inp.classList.toggle('ok',valid&&inp.value.trim()!==''); }
+function flashErrors(){
+  if(state.step===1){ markField('#f-name',!!$('#i-name').value.trim()); markField('#f-phone',phoneOk($('#i-phone').value)); markField('#f-email',emailOk($('#i-email').value)); markField('#f-address',!!$('#i-address').value.trim()); }
+  if(state.step===2){ markField('#f-desc',$('#i-desc').value.trim().length>=3); if(!state.svc) toast('Choose what you need help with'); }
+}
+['i-name','i-phone','i-email','i-desc'].forEach(id=>$('#'+id).addEventListener('input',()=>{
+  validateStep();
+  const map={'i-name':'#f-name','i-phone':'#f-phone','i-email':'#f-email','i-desc':'#f-desc'};
+  const f=$(map[id]);
+  if(f.classList.contains('invalid')){
+    if(id==='i-email') markField('#f-email',emailOk($('#i-email').value));
+    else if(id==='i-phone') markField('#f-phone',phoneOk($('#i-phone').value));
+    else markField(map[id],$('#'+id).value.trim().length>0);
+  }
+}));
+
+/* ---------- Address search (mock autocomplete) ---------- */
+const ADDR=[
+  // Hibiscus Coast / North
+  ['42 Hibiscus Coast Highway','Orewa, Auckland 0931'],['77 Red Beach Road','Red Beach, Auckland 0932'],
+  ['15 Whangaparaoa Road','Whangaparaoa, Auckland 0930'],['9 Silverdale Street','Silverdale, Auckland 0932'],
+  // North Shore
+  ['8 Hurstmere Road','Takapuna, Auckland 0622'],['120 Lake Road','Devonport, Auckland 0624'],
+  ['33 Glenfield Road','Glenfield, Auckland 0629'],['5 Clyde Road','Browns Bay, Auckland 0630'],
+  ['210 Albany Highway','Albany, Auckland 0632'],['18 Kitchener Road','Milford, Auckland 0620'],
+  ['46 Birkenhead Avenue','Birkenhead, Auckland 0626'],['12 Sunnynook Road','Sunnynook, Auckland 0620'],
+  // Central
+  ['200 Queen Street','Auckland CBD, Auckland 1010'],['12 Ponsonby Road','Ponsonby, Auckland 1011'],
+  ['88 Great North Road','Grey Lynn, Auckland 1021'],['54 Mount Eden Road','Mount Eden, Auckland 1024'],
+  ['9 Manukau Road','Epsom, Auckland 1023'],['145 Remuera Road','Remuera, Auckland 1050'],
+  ['7 Broadway','Newmarket, Auckland 1023'],['23 Parnell Road','Parnell, Auckland 1052'],
+  ['61 New North Road','Kingsland, Auckland 1021'],['101 Dominion Road','Balmoral, Auckland 1024'],
+  ['30 Onehunga Mall','Onehunga, Auckland 1061'],['72 Sandringham Road','Sandringham, Auckland 1025'],
+  ['5 Main Highway','Ellerslie, Auckland 1051'],['70 Mount Wellington Highway','Mount Wellington, Auckland 1060'],
+  // West
+  ['16 Great North Road','Henderson, Auckland 0612'],['4 Totara Avenue','New Lynn, Auckland 0600'],
+  ['58 Te Atatu Road','Te Atatu, Auckland 0610'],['133 Don Buck Road','Massey, Auckland 0614'],
+  ['27 West Coast Road','Glen Eden, Auckland 0602'],['11 Titirangi Road','Titirangi, Auckland 0604'],
+  ['90 Rosebank Road','Avondale, Auckland 0600'],['8 Universal Drive','Henderson, Auckland 0610'],
+  // East
+  ['250 Ti Rakau Drive','Botany Downs, Auckland 2013'],['14 Picton Street','Howick, Auckland 2014'],
+  ['39 Pakuranga Road','Pakuranga, Auckland 2010'],['6 Chapel Road','Flat Bush, Auckland 2016'],
+  // South
+  ['320 Great South Road','Manukau, Auckland 2104'],['25 Great South Road','Papakura, Auckland 2110'],
+  ['48 Roscommon Road','Manurewa, Auckland 2102'],['17 Massey Road','Mangere, Auckland 2022'],
+  ['64 St George Street','Papatoetoe, Auckland 2025'],['9 Walters Road','Takanini, Auckland 2112'],
+  ['150 King Street','Pukekohe, Auckland 2120'],['22 Atkinson Avenue','Otahuhu, Auckland 1062']
+];
+const addrInput=$('#i-address'), sg=$('#suggest'); let hlIndex=-1;
+function pinSvg(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>'; }
+function renderSuggest(q){
+  const v=q.trim().toLowerCase();
+  if(!v){ sg.classList.remove('show'); return; }
+  const matches=ADDR.filter(a=>(a[0]+' '+a[1]).toLowerCase().includes(v)).slice(0,5);
+  let html=matches.map((a,i)=>`<div class="sg" data-i="${i}" data-full="${a[0]}, ${a[1]}"><div class="pin">${pinSvg()}</div><div class="txt"><b>${a[0]}</b><small>${a[1]}</small></div></div>`).join('');
+  html+=`<div class="sg manual" data-manual="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Use "${q.trim()}" as typed</div>`;
+  sg.innerHTML=html; hlIndex=-1; sg.classList.add('show');
+  $$('#suggest .sg').forEach(el=>el.addEventListener('click',()=>{
+    addrInput.value = el.dataset.manual ? addrInput.value.trim() : el.dataset.full;
+    state.addressPicked=true; sg.classList.remove('show');
+    markField('#f-address',true); validateStep();
+  }));
+}
+addrInput.addEventListener('input',e=>{ state.addressPicked=false; renderSuggest(e.target.value); validateStep(); });
+addrInput.addEventListener('keydown',e=>{
+  const items=$$('#suggest .sg'); if(!items.length) return;
+  if(e.key==='ArrowDown'){ e.preventDefault(); hlIndex=Math.min(hlIndex+1,items.length-1); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); hlIndex=Math.max(hlIndex-1,0); }
+  else if(e.key==='Enter'){ if(hlIndex>=0){ e.preventDefault(); items[hlIndex].click(); } return; }
+  else return;
+  items.forEach((el,i)=>el.classList.toggle('hl',i===hlIndex));
+});
+document.addEventListener('click',e=>{ if(!e.target.closest('.search-wrap')) sg.classList.remove('show'); });
+
+/* ---------- Chips & urgency ---------- */
+$$('#svcChips .chip').forEach(c=>c.addEventListener('click',()=>{ $$('#svcChips .chip').forEach(x=>x.classList.remove('sel')); c.classList.add('sel'); state.svc=c.dataset.svc; validateStep(); }));
+$$('#urgency button').forEach(b=>b.addEventListener('click',()=>{ $$('#urgency button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); state.urgency=b.dataset.urg; }));
+
+/* ---------- Photos ---------- */
+const dz=$('#dropzone'), fi=$('#fileInput');
+dz.addEventListener('click',()=>fi.click());
+fi.addEventListener('change',e=>addPhotos(e.target.files));
+['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag');}));
+dz.addEventListener('drop',e=>addPhotos(e.dataTransfer.files));
+function addPhotos(files){ [...files].forEach(f=>{ if(f.type.startsWith('image/')) state.photos.push({url:URL.createObjectURL(f)}); }); renderThumbs(); if(files.length) toast(state.photos.length+' photo'+(state.photos.length>1?'s':'')+' added'); }
+function renderThumbs(){
+  const t=$('#thumbs'); t.innerHTML='';
+  state.photos.forEach((p,i)=>{ const d=document.createElement('div'); d.className='thumb'; d.innerHTML=`<img src="${p.url}"><button class="rm" data-i="${i}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg></button>`; t.appendChild(d); });
+  $$('#thumbs .rm').forEach(b=>b.addEventListener('click',()=>{ state.photos.splice(+b.dataset.i,1); renderThumbs(); }));
+}
+
+/* ---------- Recap ---------- */
+function buildRecap(){
+  $('#r-name').textContent=$('#i-name').value||'—';
+  $('#r-address').textContent=$('#i-address').value||'—';
+  $('#r-job').textContent=state.svc||'—';
+  $('#r-urg').textContent=state.urgency;
+  $('#r-photos').textContent=state.photos.length?state.photos.length+' attached':'None added';
+}
+function buildDoc(){
+  $('#doc-name').textContent=$('#i-name').value.trim()||'your property';
+  $('#doc-date').textContent=new Date().toLocaleDateString('en-NZ',{day:'numeric',month:'short',year:'numeric'});
+}
+
+/* ---------- Sheets ---------- */
+function openSheet(id){ $('#scrim').classList.add('show'); $('#'+id).classList.add('show'); }
+function closeSheets(){ $('#scrim').classList.remove('show'); $$('.sheet').forEach(s=>s.classList.remove('show')); }
+$('#scrim').addEventListener('click',closeSheets);
+$$('[data-close]').forEach(b=>b.addEventListener('click',closeSheets));
+const agree=$('#agreeBox');
+agree.addEventListener('click',()=>{ agree.classList.toggle('checked'); $('#tncConfirm').disabled=!agree.classList.contains('checked'); });
+$('#tncConfirm').addEventListener('click',()=>{
+  const btn=$('#tncConfirm'); btn.disabled=true; btn.innerHTML='<span class="spin"></span> Sending to Flowpro…';
+  setTimeout(()=>{
+    closeSheets();
+    $$('#dots .dot').forEach(d=>{ if(+d.dataset.step===MAX){ d.classList.add('done'); d.classList.remove('active'); d.querySelector('.pip').innerHTML='<svg class="pip-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>'; }});
+    $('#barFill').style.width='100%';
+    $('#suc-name').textContent=($('#i-name').value.trim().split(' ')[0])||'there';
+    $('#ref').textContent='FP-'+Math.floor(10000+Math.random()*89999);
+    $('#success').classList.add('show');
+  },1400);
+});
+
+renderStep('fwd');
+</script>
+</body>
+</html>
