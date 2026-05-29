@@ -13,9 +13,13 @@ export function SendBookingLink() {
     if (!phone.trim()) return;
     setMsg(null);
     start(async () => {
-      const r = await sendBookingLink({ phone, name });
-      setMsg({ ok: r.ok, text: r.message });
-      if (r.ok) { setPhone(''); setName(''); }
+      try {
+        const r = await sendBookingLink({ phone, name });
+        setMsg({ ok: r.ok, text: r.message });
+        if (r.ok) { setPhone(''); setName(''); }
+      } catch {
+        setMsg({ ok: false, text: 'Something went wrong sending the text. Please try again.' });
+      }
     });
   }
 
