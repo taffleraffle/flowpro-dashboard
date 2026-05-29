@@ -36,6 +36,9 @@ export default async function BookingsPage() {
               <div style={{ display: 'grid', gap: 10 }}>
                 {bookings.map((b) => {
                   const s = STATUS[b.status] ?? STATUS.new;
+                  const when = b.preferred_date
+                    ? `${b.preferred_date}${b.preferred_time ? ` · ${b.preferred_time}` : ''}`
+                    : b.urgency;
                   return (
                     <div
                       key={b.id}
@@ -60,11 +63,12 @@ export default async function BookingsPage() {
                           <div style={{ fontWeight: 600 }}>{b.name}</div>
                           <div className="tiny muted">{b.phone} · {b.email}</div>
                           <div className="tiny muted" style={{ marginTop: 2 }}>{b.address}</div>
+                          {b.owner_or_tenant ? <div className="tiny muted" style={{ marginTop: 2 }}>{b.owner_or_tenant}</div> : null}
                         </div>
                         <div>
                           <div className="tiny">
                             <span style={{ fontWeight: 600 }}>{b.service ?? 'Service —'}</span>
-                            {b.urgency ? <span className="muted"> · {b.urgency}</span> : null}
+                            {when ? <span className="muted"> · {when}</span> : null}
                           </div>
                           {b.description ? (
                             <div className="tiny muted" style={{ marginTop: 2 }}>{b.description.slice(0, 160)}</div>

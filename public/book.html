@@ -332,6 +332,12 @@ textarea.input{resize:none; min-height:84px; line-height:1.5}
         </div>
         <div class="err-msg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg> Search and select the job address</div>
       </div>
+
+      <div class="blk-label" style="margin-top:4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l8-4v18M19 21V10l-6-3"/></svg> Are you the owner or tenant? <span class="req">*</span></div>
+      <div class="seg" id="ownerType">
+        <button data-owner="Owner"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l8-4v18M19 21V10l-6-3"/></svg>Owner</button>
+        <button data-owner="Tenant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Tenant</button>
+      </div>
     </section>
 
     <!-- STEP 2 — The job (+ photos merged) -->
@@ -351,11 +357,25 @@ textarea.input{resize:none; min-height:84px; line-height:1.5}
         <div class="chip" data-svc="Not sure"><div class="ci"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></div><b>Not sure</b></div>
       </div>
 
-      <div class="blk-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> How urgent is it?</div>
+      <div class="blk-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> When would suit?</div>
       <div class="seg" id="urgency">
-        <button data-urg="Emergency" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg>ASAP</button>
+        <button data-urg="ASAP" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg>ASAP</button>
         <button data-urg="This week"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>This week</button>
-        <button data-urg="Flexible"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>Flexible</button>
+        <button data-urg="Pick a date"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01"/></svg>Pick a date</button>
+      </div>
+      <div id="dateWrap" style="display:none">
+        <div class="row2" style="margin-top:10px">
+          <div class="field" style="margin-bottom:0">
+            <label>Preferred date</label>
+            <input class="input" id="i-date" type="date">
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label>Time of day</label>
+            <select class="input" id="i-time" style="height:48px">
+              <option>Morning</option><option>Afternoon</option><option>Evening</option><option>Anytime</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       <div class="field" style="margin-top:14px" id="f-desc">
@@ -385,14 +405,15 @@ textarea.input{resize:none; min-height:84px; line-height:1.5}
         <div class="rrow"><span>Name</span><b id="r-name">—</b></div>
         <div class="rrow"><span>Address</span><b id="r-address">—</b></div>
         <div class="rrow"><span>Job</span><b id="r-job">—</b></div>
-        <div class="rrow"><span>Urgency</span><b id="r-urg">—</b></div>
+        <div class="rrow"><span>You are</span><b id="r-owner">—</b></div>
+        <div class="rrow"><span>When</span><b id="r-when">—</b></div>
         <div class="rrow"><span>Photos</span><b id="r-photos">—</b></div>
       </div>
 
       <div class="trust">
-        <div class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> No fix, no call-out fee</div>
-        <div class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Upfront price before major work</div>
-        <div class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Licensed, insured &amp; guaranteed</div>
+        <div class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> $199 + GST call-out — incl. first hour &amp; travel</div>
+        <div class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Any extra work quoted &amp; approved first</div>
+        <div class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Licensed plumbers, gasfitters &amp; drainlayers</div>
       </div>
     </section>
 
@@ -417,7 +438,7 @@ textarea.input{resize:none; min-height:84px; line-height:1.5}
       <div class="paper">
         <div class="paper-head">
           <img src="flowpro-logo-new-1.svg" alt="Flowpro" onerror="this.style.display='none'">
-          <div class="paper-co">Flowpro Plumbers &amp; Gasfitters<br>Orewa, Auckland · 0800 FLOWPRO<br>Licensed Plumbers, Gasfitters &amp; Drainlayers</div>
+          <div class="paper-co">Flow Pro &amp; A Plumber Near Me<br>Silverdale, Auckland · plumbing@flowpro.co.nz<br>Licensed Plumbers, Gasfitters &amp; Drainlayers</div>
         </div>
         <div class="paper-title">Service Agreement</div>
         <div class="paper-meta"><span>Prepared for <b id="doc-name">—</b></span><span id="doc-date">—</span></div>
@@ -425,9 +446,9 @@ textarea.input{resize:none; min-height:84px; line-height:1.5}
           <h6>1. Booking &amp; attendance</h6>
           <p>By confirming this agreement you request that Flowpro attend the address you have provided to assess and, where possible, complete the work described. We will contact you to confirm an appointment time. A call-out fee applies once a plumber has been dispatched.</p>
           <h6>2. Pricing</h6>
-          <p>Our standard rates are a call-out fee of $89 + GST (which includes the first 30 minutes on site), labour thereafter at $120 per hour charged in 15-minute blocks, and after-hours or emergency work at $160 per hour. Parts and materials are additional and itemised. You will be advised of the price before any major work begins.</p>
-          <h6>3. No fix, no call-out fee</h6>
-          <p>If we attend and are genuinely unable to assist with the issue, the call-out fee is waived. This does not apply where site access is not provided or a confirmed appointment is missed.</p>
+          <p>Our standard call-out fee is <strong>$199 + GST</strong> (minimum charge), which includes the first hour on site and travel. After-hours call-outs are <strong>$379 + GST</strong> (minimum charge), also including the first hour on site and travel. Where the job requires it, additional charges apply: drain unblocking — establishment $80, Hydrojet &amp; CCTV $190 per hour; leak detection $359; and a public holiday fee of $299. Parts and materials are additional and itemised.</p>
+          <h6>3. Additional work</h6>
+          <p>Any work beyond the call-out is quoted and approved by you before it proceeds — no surprises.</p>
           <h6>4. Cancellations</h6>
           <p>Please give us at least two hours' notice to cancel or reschedule. Missed appointments may incur the call-out fee.</p>
           <h6>5. Workmanship &amp; privacy</h6>
@@ -467,7 +488,7 @@ textarea.input{resize:none; min-height:84px; line-height:1.5}
 <script>
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
-const state = { step:1, svc:null, urgency:'Emergency', photos:[], addressPicked:false };
+const state = { step:1, svc:null, urgency:'ASAP', ownerType:null, preferredDate:'', preferredTime:'Morning', photos:[], addressPicked:false };
 const stepNames = ['Your details','The job','Confirm & book'];
 const MAX = 3;
 
@@ -507,7 +528,7 @@ $('#backBtn').addEventListener('click',goBack);
 const emailOk=v=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 const phoneOk=v=>v.replace(/\D/g,'').length>=8;
 function stepValid(){
-  if(state.step===1) return $('#i-name').value.trim() && phoneOk($('#i-phone').value) && emailOk($('#i-email').value) && $('#i-address').value.trim();
+  if(state.step===1) return $('#i-name').value.trim() && phoneOk($('#i-phone').value) && emailOk($('#i-email').value) && $('#i-address').value.trim() && state.ownerType;
   if(state.step===2) return state.svc && $('#i-desc').value.trim().length>=3;
   return true;
 }
@@ -515,7 +536,7 @@ function validateStep(){
   const ok=stepValid(); $('#nextBtn').disabled=!ok; const why=$('#why');
   if(ok){ why.classList.remove('show'); return; }
   let msg='';
-  if(state.step===1) msg='Fill in your name, mobile, email and address to continue';
+  if(state.step===1) msg='Fill in your details (incl. owner or tenant) to continue';
   if(state.step===2) msg=state.svc ? 'Add a quick description of the problem' : 'Pick what you need help with first';
   why.textContent=msg; why.classList.add('show');
 }
@@ -593,9 +614,12 @@ addrInput.addEventListener('keydown',e=>{
 });
 document.addEventListener('click',e=>{ if(!e.target.closest('.search-wrap')) sg.classList.remove('show'); });
 
-/* ---------- Chips & urgency ---------- */
+/* ---------- Chips, owner, when ---------- */
 $$('#svcChips .chip').forEach(c=>c.addEventListener('click',()=>{ $$('#svcChips .chip').forEach(x=>x.classList.remove('sel')); c.classList.add('sel'); state.svc=c.dataset.svc; validateStep(); }));
-$$('#urgency button').forEach(b=>b.addEventListener('click',()=>{ $$('#urgency button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); state.urgency=b.dataset.urg; }));
+$$('#ownerType button').forEach(b=>b.addEventListener('click',()=>{ $$('#ownerType button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); state.ownerType=b.dataset.owner; validateStep(); }));
+$$('#urgency button').forEach(b=>b.addEventListener('click',()=>{ $$('#urgency button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); state.urgency=b.dataset.urg; const dw=$('#dateWrap'); if(dw) dw.style.display = b.dataset.urg==='Pick a date' ? 'block':'none'; }));
+{ const dEl=$('#i-date'); if(dEl) dEl.addEventListener('change',e=>state.preferredDate=e.target.value);
+  const tEl=$('#i-time'); if(tEl) tEl.addEventListener('change',e=>state.preferredTime=e.target.value); }
 
 /* ---------- Photos ---------- */
 const dz=$('#dropzone'), fi=$('#fileInput');
@@ -612,11 +636,19 @@ function renderThumbs(){
 }
 
 /* ---------- Recap ---------- */
+function whenText(){
+  if(state.urgency==='Pick a date'){
+    if(state.preferredDate){ const d=new Date(state.preferredDate+'T00:00:00'); return d.toLocaleDateString('en-NZ',{weekday:'short',day:'numeric',month:'short'})+' · '+(state.preferredTime||'Anytime'); }
+    return 'A chosen date';
+  }
+  return state.urgency;
+}
 function buildRecap(){
   $('#r-name').textContent=$('#i-name').value||'—';
   $('#r-address').textContent=$('#i-address').value||'—';
   $('#r-job').textContent=state.svc||'—';
-  $('#r-urg').textContent=state.urgency;
+  $('#r-owner').textContent=state.ownerType||'—';
+  $('#r-when').textContent=whenText();
   $('#r-photos').textContent=state.photos.length?state.photos.length+' attached':'None added';
 }
 function buildDoc(){
@@ -664,6 +696,9 @@ $('#tncConfirm').addEventListener('click', async ()=>{
     const payload={
       name:$('#i-name').value.trim(), email:$('#i-email').value.trim(), phone:$('#i-phone').value.trim(),
       address:$('#i-address').value.trim(), service:state.svc||undefined, urgency:state.urgency||undefined,
+      owner_or_tenant:state.ownerType||undefined,
+      preferred_date:(state.urgency==='Pick a date'&&state.preferredDate)?state.preferredDate:undefined,
+      preferred_time:(state.urgency==='Pick a date')?(state.preferredTime||'Anytime'):undefined,
       description:$('#i-desc').value.trim()||undefined, photos,
       company:(document.getElementById('i-company')||{}).value||''
     };

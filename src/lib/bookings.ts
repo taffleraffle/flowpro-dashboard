@@ -11,6 +11,9 @@ export type BookingRow = {
   address: string;
   service: string | null;
   urgency: string | null;
+  owner_or_tenant: string | null;
+  preferred_date: string | null;
+  preferred_time: string | null;
   description: string | null;
   photo_urls: string[];
   status: BookingStatus;

@@ -349,6 +349,9 @@ export type BookingInput = {
   address: string;
   service?: string;
   urgency?: string;
+  ownerOrTenant?: string;
+  preferredDate?: string;
+  preferredTime?: string;
   description?: string;
   photoUrls?: string[];
 };
@@ -373,7 +376,10 @@ export async function createBookingInSimpro(
     { Name: `${b.name} — ${b.address}`.slice(0, 250), Address: address },
   );
 
+  const preferred =
+    b.preferredDate ? `${b.preferredDate}${b.preferredTime ? ` (${b.preferredTime})` : ''}` : (b.urgency ?? '—');
   const notes = [
+    `<p><strong>${escapeHtml(b.ownerOrTenant ?? 'Owner/Tenant not stated')}</strong> · Preferred: ${escapeHtml(preferred)}</p>`,
     b.description ? `<p>${escapeHtml(b.description)}</p>` : '',
     b.photoUrls && b.photoUrls.length
       ? `<p>Photos:<br>${b.photoUrls.map((u) => `<a href="${u}">${escapeHtml(u)}</a>`).join('<br>')}</p>`
@@ -388,7 +394,7 @@ export async function createBookingInSimpro(
     Customer: customer.ID,
     Site: site.ID,
     Stage: 'Open',
-    Description: `Service: ${b.service ?? '—'} | Urgency: ${b.urgency ?? '—'}`,
+    Description: `Service: ${b.service ?? '—'} | When: ${preferred} | ${b.ownerOrTenant ?? '—'}`,
     Notes: notes,
   });
 
