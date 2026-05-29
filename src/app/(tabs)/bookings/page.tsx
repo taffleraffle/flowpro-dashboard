@@ -1,6 +1,7 @@
 import { TopBar, SubBar, PageFooter } from '@/components/Shell';
 import { getActiveErrors } from '@/lib/metrics';
 import { getRecentBookings, type BookingStatus } from '@/lib/bookings';
+import { SendBookingLink } from '@/components/SendBookingLink';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,7 @@ export default async function BookingsPage() {
       <TopBar syncErrors={errorRuns.length} />
       <SubBar title="Bookings" crumb="Dashboard · Bookings" showFilters={false} />
       <div className="page">
+        <SendBookingLink />
         <div className="card">
           <div className="card-h">
             <div>

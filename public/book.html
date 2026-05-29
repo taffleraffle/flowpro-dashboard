@@ -443,6 +443,7 @@ textarea.input{resize:none; min-height:84px; line-height:1.5}
         <div class="paper-title">Service Agreement</div>
         <div class="paper-meta"><span>Prepared for <b id="doc-name">—</b></span><span id="doc-date">—</span></div>
         <div class="paper-body">
+          <div id="doc-rate" style="font-family:var(--body);background:var(--cyan-soft);border:1px solid var(--cyan-soft2);border-radius:9px;padding:11px 13px;margin-bottom:14px;font-size:12.5px;line-height:1.45;color:var(--navy)"></div>
           <h6>1. Booking &amp; attendance</h6>
           <p>By confirming this agreement you request that Flowpro attend the address you have provided to assess and, where possible, complete the work described. We will contact you to confirm an appointment time. A call-out fee applies once a plumber has been dispatched.</p>
           <h6>2. Pricing</h6>
@@ -637,9 +638,27 @@ function buildRecap(){
   $('#r-when').textContent=whenText();
   $('#r-photos').textContent=state.photos.length?state.photos.length+' attached':'None added';
 }
+// Standard hours = Mon–Fri 7am–5pm. After-hours = before 7am, from 5pm, or weekends.
+// Uses the chosen date/time when "Pick a date", otherwise the current time.
+function rateContext(){
+  const now=new Date(); let hour=now.getHours(); let day=now.getDay();
+  if(state.urgency==='Pick a date'){
+    if(state.preferredDate){ const d=new Date(state.preferredDate+'T00:00:00'); if(!isNaN(d)) day=d.getDay(); }
+    const t=(state.preferredTime||'').toLowerCase();
+    if(t==='morning') hour=9; else if(t==='afternoon') hour=14; else if(t==='evening') hour=18;
+  }
+  const weekend=(day===0||day===6);
+  return { afterHours: weekend || hour>=17 || hour<7, weekend };
+}
 function buildDoc(){
   $('#doc-name').textContent=$('#i-name').value.trim()||'your property';
   $('#doc-date').textContent=new Date().toLocaleDateString('en-NZ',{day:'numeric',month:'short',year:'numeric'});
+  const c=rateContext(); const el=$('#doc-rate');
+  if(el){
+    el.innerHTML = c.afterHours
+      ? `Based on your timing, the <strong>after-hours call-out</strong> applies — <strong>$379 + GST</strong> (minimum charge)${c.weekend?', weekend rate':''}. Includes the first hour on site &amp; travel.`
+      : `Based on your timing, the <strong>standard call-out</strong> applies — <strong>$199 + GST</strong> (minimum charge), Mon–Fri 7am–5pm. Includes the first hour on site &amp; travel.`;
+  }
 }
 
 /* ---------- Sheets ---------- */
