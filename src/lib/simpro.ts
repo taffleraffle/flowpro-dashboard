@@ -297,3 +297,100 @@ export async function ping(): Promise<{ ok: true; companies: Array<{ ID: number;
   const { data } = await simproFetch<Array<{ ID: number; Name?: string }>>('/api/v1.0/companies/');
   return { ok: true, companies: data };
 }
+
+// ============================================================
+// Writes — used by the online booking flow (/api/book).
+// Validated against the live Flow Pro tenant: an inbound booking becomes
+// an Individual Customer -> Site -> Lead (Stage "Open"). createSite=true on
+// the customer does NOT return a usable site here, so we create the site
+// explicitly and reference it on the lead.
+// ============================================================
+async function simproPost<T>(path: string, body: unknown): Promise<T> {
+  const doFetch = (token: string) =>
+    fetch(baseUrl() + path, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify(body),
+      cache: 'no-store',
+    });
+
+  let token = await getToken();
+  let res = await doFetch(token);
+  if (res.status === 401) {
+    cached = null;
+    token = await getToken();
+    res = await doFetch(token);
+  }
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`SimPro POST ${res.status} on ${path}: ${text.slice(0, 400)}`);
+  }
+  return (await res.json()) as T;
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function splitName(full: string): { given: string; family: string } {
+  const parts = full.trim().split(/\s+/).filter(Boolean);
+  if (parts.length <= 1) return { given: parts[0] ?? 'Customer', family: '—' };
+  return { given: parts[0], family: parts.slice(1).join(' ') };
+}
+
+export type BookingInput = {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  service?: string;
+  urgency?: string;
+  description?: string;
+  photoUrls?: string[];
+};
+
+// Orchestrates Customer -> Site -> Lead. Returns the created SimPro IDs.
+// Throws on any step so the caller can mark the booking as 'error' and the
+// customer never sees a false confirmation.
+export async function createBookingInSimpro(
+  b: BookingInput,
+): Promise<{ customerId: number; siteId: number; leadId: number }> {
+  const cid = env().companyId;
+  const { given, family } = splitName(b.name);
+  const address = { Address: b.address, Country: 'New Zealand' };
+
+  const customer = await simproPost<{ ID: number }>(
+    `/api/v1.0/companies/${cid}/customers/individuals/`,
+    { GivenName: given, FamilyName: family, Email: b.email, Phone: b.phone, Address: address },
+  );
+
+  const site = await simproPost<{ ID: number }>(
+    `/api/v1.0/companies/${cid}/sites/`,
+    { Name: `${b.name} — ${b.address}`.slice(0, 250), Address: address },
+  );
+
+  const notes = [
+    b.description ? `<p>${escapeHtml(b.description)}</p>` : '',
+    b.photoUrls && b.photoUrls.length
+      ? `<p>Photos:<br>${b.photoUrls.map((u) => `<a href="${u}">${escapeHtml(u)}</a>`).join('<br>')}</p>`
+      : '',
+    `<p><em>Submitted via the online booking form on ${new Date().toLocaleString('en-NZ')}.</em></p>`,
+  ]
+    .filter(Boolean)
+    .join('');
+
+  const lead = await simproPost<{ ID: number }>(`/api/v1.0/companies/${cid}/leads/`, {
+    LeadName: `${b.service ?? 'Booking'} — ${b.urgency ?? ''} — ${b.name}`.slice(0, 250),
+    Customer: customer.ID,
+    Site: site.ID,
+    Stage: 'Open',
+    Description: `Service: ${b.service ?? '—'} | Urgency: ${b.urgency ?? '—'}`,
+    Notes: notes,
+  });
+
+  return { customerId: customer.ID, siteId: site.ID, leadId: lead.ID };
+}

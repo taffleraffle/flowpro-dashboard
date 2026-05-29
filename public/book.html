@@ -437,6 +437,7 @@ textarea.input{resize:none; min-height:84px; line-height:1.5}
       </div>
     </div>
     <div class="doc-foot">
+      <input id="i-company" name="company" autocomplete="off" tabindex="-1" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
       <div class="agree-box" id="agreeBox" style="margin:0 0 10px">
         <div class="cbx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
         <p>I've read and agree to the terms of service.</p>
@@ -603,7 +604,7 @@ fi.addEventListener('change',e=>addPhotos(e.target.files));
 ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('drag');}));
 ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('drag');}));
 dz.addEventListener('drop',e=>addPhotos(e.dataTransfer.files));
-function addPhotos(files){ [...files].forEach(f=>{ if(f.type.startsWith('image/')) state.photos.push({url:URL.createObjectURL(f)}); }); renderThumbs(); if(files.length) toast(state.photos.length+' photo'+(state.photos.length>1?'s':'')+' added'); }
+function addPhotos(files){ [...files].forEach(f=>{ if(f.type.startsWith('image/')) state.photos.push({url:URL.createObjectURL(f), file:f}); }); renderThumbs(); if(files.length) toast(state.photos.length+' photo'+(state.photos.length>1?'s':'')+' added'); }
 function renderThumbs(){
   const t=$('#thumbs'); t.innerHTML='';
   state.photos.forEach((p,i)=>{ const d=document.createElement('div'); d.className='thumb'; d.innerHTML=`<img src="${p.url}"><button class="rm" data-i="${i}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 6 6 18M6 6l12 12"/></svg></button>`; t.appendChild(d); });
@@ -630,16 +631,55 @@ $('#scrim').addEventListener('click',closeSheets);
 $$('[data-close]').forEach(b=>b.addEventListener('click',closeSheets));
 const agree=$('#agreeBox');
 agree.addEventListener('click',()=>{ agree.classList.toggle('checked'); $('#tncConfirm').disabled=!agree.classList.contains('checked'); });
-$('#tncConfirm').addEventListener('click',()=>{
-  const btn=$('#tncConfirm'); btn.disabled=true; btn.innerHTML='<span class="spin"></span> Sending to Flowpro…';
-  setTimeout(()=>{
+/* Downscale photos client-side so the POST payload stays small */
+function downscale(file){
+  return new Promise(res=>{
+    const img=new Image(); const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      const max=1280; let w=img.width, h=img.height;
+      if(w>max||h>max){ const s=Math.min(max/w,max/h); w=Math.round(w*s); h=Math.round(h*s); }
+      const c=document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      try{ res(c.toDataURL('image/jpeg',0.7)); }catch(e){ res(null); }
+    };
+    img.onerror=()=>{ URL.revokeObjectURL(url); res(null); };
+    img.src=url;
+  });
+}
+function showDocError(msg, btn){
+  let e=document.getElementById('docErr');
+  if(!e){ e=document.createElement('div'); e.id='docErr';
+    e.style.cssText='font-size:12px;color:var(--danger-ink);background:var(--danger-bg);border:1px solid #f3c9c9;padding:9px 12px;border-radius:9px;margin-bottom:10px;text-align:center;font-weight:500';
+    btn.parentNode.insertBefore(e, btn); }
+  e.textContent=msg;
+}
+$('#tncConfirm').addEventListener('click', async ()=>{
+  const btn=$('#tncConfirm'); const orig=btn.innerHTML;
+  const old=document.getElementById('docErr'); if(old) old.remove();
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span> Sending to Flowpro…';
+  try{
+    const photos=[];
+    for(const p of state.photos){ if(p.file){ const d=await downscale(p.file); if(d) photos.push({dataUrl:d}); } }
+    const payload={
+      name:$('#i-name').value.trim(), email:$('#i-email').value.trim(), phone:$('#i-phone').value.trim(),
+      address:$('#i-address').value.trim(), service:state.svc||undefined, urgency:state.urgency||undefined,
+      description:$('#i-desc').value.trim()||undefined, photos,
+      company:(document.getElementById('i-company')||{}).value||''
+    };
+    const r=await fetch('/api/book',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok || !j.success){ throw new Error((j&&j.error)||'Something went wrong. Please try again.'); }
     closeSheets();
     $$('#dots .dot').forEach(d=>{ if(+d.dataset.step===MAX){ d.classList.add('done'); d.classList.remove('active'); d.querySelector('.pip').innerHTML='<svg class="pip-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>'; }});
     $('#barFill').style.width='100%';
-    $('#suc-name').textContent=($('#i-name').value.trim().split(' ')[0])||'there';
-    $('#ref').textContent='FP-'+Math.floor(10000+Math.random()*89999);
+    $('#suc-name').textContent=(payload.name.split(' ')[0])||'there';
+    $('#ref').textContent=(j.data&&j.data.ref)||'FP-—';
     $('#success').classList.add('show');
-  },1400);
+  }catch(err){
+    btn.disabled=false; btn.innerHTML=orig;
+    showDocError((err&&err.message)||'Could not send. Please try again or call us.', btn);
+  }
 });
 
 renderStep('fwd');

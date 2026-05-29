@@ -9,6 +9,7 @@ import { PERIODS, parsePeriod, type Period } from '@/lib/periods';
 
 const TABS = [
   { label: 'Overview',   href: '/' },
+  { label: 'Bookings',   href: '/bookings' },
   { label: 'Sales',      href: '/sales' },
   { label: 'Marketing',  href: '/marketing' },
   { label: 'Operations', href: '/operations' },
@@ -308,14 +309,33 @@ function SearchBox() {
 // ============================================================
 // Notifications bell (kept as client — needs fetch)
 // ============================================================
+type BellBooking = { id: string; ref: string; name: string; service: string | null; status: string; created_at: string };
+
 function NotificationsButton({ count }: { count: number }) {
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<Array<{ id: number; source: string; error_message: string | null; started_at: string }>>([]);
+  const [bookings, setBookings] = useState<BellBooking[]>([]);
+  const [unseen, setUnseen] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
+
+  // Poll booking count for the badge (mount + every 60s) so new bookings
+  // surface without a page reload.
+  useEffect(() => {
+    let alive = true;
+    const load = () =>
+      fetch('/api/bookings')
+        .then(r => r.json())
+        .then(d => { if (alive) { setUnseen(d.unseen ?? 0); setBookings(d.items ?? []); } })
+        .catch(() => {});
+    load();
+    const t = setInterval(load, 60000);
+    return () => { alive = false; clearInterval(t); };
+  }, []);
 
   useEffect(() => {
     if (!open) return;
     fetch('/api/notifications').then(r => r.json()).then(d => setItems(d.items ?? []));
+    fetch('/api/bookings').then(r => r.json()).then(d => { setUnseen(d.unseen ?? 0); setBookings(d.items ?? []); }).catch(() => {});
   }, [open]);
 
   useEffect(() => {
@@ -326,12 +346,14 @@ function NotificationsButton({ count }: { count: number }) {
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
 
+  const badge = count + unseen;
+
   return (
     <div ref={ref} style={{ position: 'relative' }}>
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        aria-label={`${count} notifications`}
+        aria-label={`${badge} notifications`}
         style={{
           width: 36, height: 36, borderRadius: 8,
           background: 'var(--surface-2)', color: 'var(--ink)',
@@ -340,22 +362,34 @@ function NotificationsButton({ count }: { count: number }) {
         }}
       >
         <Icon name="bell" size={15} />
-        {count > 0 && (
+        {badge > 0 && (
           <span style={{
             position: 'absolute', top: -4, right: -4,
-            background: 'var(--danger)', color: '#fff',
+            background: unseen > 0 ? 'var(--cyan-600)' : 'var(--danger)', color: '#fff',
             borderRadius: '50%', minWidth: 18, height: 18,
             fontSize: 10, fontWeight: 700,
             display: 'grid', placeItems: 'center', padding: '0 4px',
             border: '2px solid var(--surface)',
-          }}>{count}</span>
+          }}>{badge}</span>
         )}
       </button>
       {open && (
-        <div className="popover" style={{ right: 0, top: 'calc(100% + 6px)', minWidth: 360, maxHeight: 440, overflowY: 'auto', color: 'var(--ink)' }}>
-          <div className="eyebrow" style={{ padding: '4px 6px 8px' }}>Recent sync activity</div>
+        <div className="popover" style={{ right: 0, top: 'calc(100% + 6px)', minWidth: 360, maxHeight: 460, overflowY: 'auto', color: 'var(--ink)' }}>
+          <div className="eyebrow" style={{ padding: '4px 6px 8px' }}>New bookings</div>
+          {bookings.length === 0 ? (
+            <div className="muted tiny" style={{ padding: '6px 8px 10px', textAlign: 'center' }}>No bookings yet.</div>
+          ) : bookings.slice(0, 6).map(bk => (
+            <Link key={bk.id} href="/bookings" className="popover-item" onClick={() => setOpen(false)}>
+              <div className="stack-h" style={{ justifyContent: 'space-between' }}>
+                <span style={{ fontWeight: 600, fontSize: 13 }}>{bk.name}</span>
+                <span className={`badge ${bk.status === 'sent_to_simpro' ? 'green' : bk.status === 'error' ? 'red' : 'amber'}`}>{bk.ref}</span>
+              </div>
+              <div className="tiny muted">{(bk.service ?? 'Booking')} · {new Date(bk.created_at).toLocaleString('en-NZ')}</div>
+            </Link>
+          ))}
+          <div className="eyebrow" style={{ padding: '12px 6px 8px', borderTop: '1px solid var(--divider)' }}>Recent sync activity</div>
           {items.length === 0 ? (
-            <div className="muted tiny" style={{ padding: 16, textAlign: 'center' }}>No recent activity.</div>
+            <div className="muted tiny" style={{ padding: 12, textAlign: 'center' }}>No recent activity.</div>
           ) : items.map(it => (
             <div key={it.id} style={{ padding: '8px 8px', borderTop: '1px solid var(--divider)' }}>
               <div className="stack-h">
