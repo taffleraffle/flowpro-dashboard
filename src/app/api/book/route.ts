@@ -55,15 +55,19 @@ export async function POST(req: NextRequest) {
   const supabase = getServerSupabase();
   const ref = makeRef();
 
-  // Best-effort photo upload to the public booking-photos bucket.
+  // Decode photos once: store in the public bucket (dashboard thumbnails) AND
+  // keep the base64 to attach to the SimPro lead's Attachments tab.
   const photoUrls: string[] = [];
+  const attachments: { filename: string; base64: string }[] = [];
   for (let i = 0; i < (b.photos?.length ?? 0); i++) {
     try {
       const m = b.photos![i].dataUrl.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
       if (!m) continue;
       const contentType = m[1];
       const ext = contentType.split('/')[1].replace('jpeg', 'jpg').replace('+xml', '');
-      const buf = Buffer.from(m[2], 'base64');
+      const base64 = m[2];
+      attachments.push({ filename: `${ref}-photo-${i + 1}.${ext}`, base64 });
+      const buf = Buffer.from(base64, 'base64');
       const path = `${ref}/${i + 1}.${ext}`;
       const { error } = await supabase.storage
         .from('booking-photos')
@@ -121,6 +125,7 @@ export async function POST(req: NextRequest) {
       preferredTime: b.preferred_time,
       description: b.description,
       photoUrls,
+      attachments,
     });
     await supabase
       .from('bookings')

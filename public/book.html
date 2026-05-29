@@ -557,45 +557,15 @@ function flashErrors(){
 }));
 
 /* ---------- Address search (mock autocomplete) ---------- */
-const ADDR=[
-  // Hibiscus Coast / North
-  ['42 Hibiscus Coast Highway','Orewa, Auckland 0931'],['77 Red Beach Road','Red Beach, Auckland 0932'],
-  ['15 Whangaparaoa Road','Whangaparaoa, Auckland 0930'],['9 Silverdale Street','Silverdale, Auckland 0932'],
-  // North Shore
-  ['8 Hurstmere Road','Takapuna, Auckland 0622'],['120 Lake Road','Devonport, Auckland 0624'],
-  ['33 Glenfield Road','Glenfield, Auckland 0629'],['5 Clyde Road','Browns Bay, Auckland 0630'],
-  ['210 Albany Highway','Albany, Auckland 0632'],['18 Kitchener Road','Milford, Auckland 0620'],
-  ['46 Birkenhead Avenue','Birkenhead, Auckland 0626'],['12 Sunnynook Road','Sunnynook, Auckland 0620'],
-  // Central
-  ['200 Queen Street','Auckland CBD, Auckland 1010'],['12 Ponsonby Road','Ponsonby, Auckland 1011'],
-  ['88 Great North Road','Grey Lynn, Auckland 1021'],['54 Mount Eden Road','Mount Eden, Auckland 1024'],
-  ['9 Manukau Road','Epsom, Auckland 1023'],['145 Remuera Road','Remuera, Auckland 1050'],
-  ['7 Broadway','Newmarket, Auckland 1023'],['23 Parnell Road','Parnell, Auckland 1052'],
-  ['61 New North Road','Kingsland, Auckland 1021'],['101 Dominion Road','Balmoral, Auckland 1024'],
-  ['30 Onehunga Mall','Onehunga, Auckland 1061'],['72 Sandringham Road','Sandringham, Auckland 1025'],
-  ['5 Main Highway','Ellerslie, Auckland 1051'],['70 Mount Wellington Highway','Mount Wellington, Auckland 1060'],
-  // West
-  ['16 Great North Road','Henderson, Auckland 0612'],['4 Totara Avenue','New Lynn, Auckland 0600'],
-  ['58 Te Atatu Road','Te Atatu, Auckland 0610'],['133 Don Buck Road','Massey, Auckland 0614'],
-  ['27 West Coast Road','Glen Eden, Auckland 0602'],['11 Titirangi Road','Titirangi, Auckland 0604'],
-  ['90 Rosebank Road','Avondale, Auckland 0600'],['8 Universal Drive','Henderson, Auckland 0610'],
-  // East
-  ['250 Ti Rakau Drive','Botany Downs, Auckland 2013'],['14 Picton Street','Howick, Auckland 2014'],
-  ['39 Pakuranga Road','Pakuranga, Auckland 2010'],['6 Chapel Road','Flat Bush, Auckland 2016'],
-  // South
-  ['320 Great South Road','Manukau, Auckland 2104'],['25 Great South Road','Papakura, Auckland 2110'],
-  ['48 Roscommon Road','Manurewa, Auckland 2102'],['17 Massey Road','Mangere, Auckland 2022'],
-  ['64 St George Street','Papatoetoe, Auckland 2025'],['9 Walters Road','Takanini, Auckland 2112'],
-  ['150 King Street','Pukekohe, Auckland 2120'],['22 Atkinson Avenue','Otahuhu, Auckland 1062']
-];
+// Address suggestions come live from /api/address-autocomplete — Google Places
+// when GOOGLE_PLACES_API_KEY is set, otherwise OpenStreetMap — restricted to
+// roughly a 200km radius around Auckland.
 const addrInput=$('#i-address'), sg=$('#suggest'); let hlIndex=-1;
 function pinSvg(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>'; }
-function renderSuggest(q){
-  const v=q.trim().toLowerCase();
-  if(!v){ sg.classList.remove('show'); return; }
-  const matches=ADDR.filter(a=>(a[0]+' '+a[1]).toLowerCase().includes(v)).slice(0,5);
-  let html=matches.map((a,i)=>`<div class="sg" data-i="${i}" data-full="${a[0]}, ${a[1]}"><div class="pin">${pinSvg()}</div><div class="txt"><b>${a[0]}</b><small>${a[1]}</small></div></div>`).join('');
-  html+=`<div class="sg manual" data-manual="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Use "${q.trim()}" as typed</div>`;
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function renderList(items, typed){
+  let html=items.map(a=>`<div class="sg" data-full="${esc(a.full)}"><div class="pin">${pinSvg()}</div><div class="txt"><b>${esc(a.main||a.full)}</b><small>${esc(a.secondary||'')}</small></div></div>`).join('');
+  html+=`<div class="sg manual" data-manual="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Use "${esc(typed)}" as typed</div>`;
   sg.innerHTML=html; hlIndex=-1; sg.classList.add('show');
   $$('#suggest .sg').forEach(el=>el.addEventListener('click',()=>{
     addrInput.value = el.dataset.manual ? addrInput.value.trim() : el.dataset.full;
@@ -603,7 +573,23 @@ function renderSuggest(q){
     markField('#f-address',true); validateStep();
   }));
 }
-addrInput.addEventListener('input',e=>{ state.addressPicked=false; renderSuggest(e.target.value); validateStep(); });
+let addrTimer, addrSeq=0;
+async function fetchSuggest(q){
+  const seq=++addrSeq;
+  try{
+    const r=await fetch('/api/address-autocomplete?q='+encodeURIComponent(q));
+    const j=await r.json();
+    if(seq!==addrSeq) return;            // a newer keystroke already fired
+    renderList((j&&j.suggestions)||[], q);
+  }catch(e){ if(seq===addrSeq) renderList([], q); }
+}
+addrInput.addEventListener('input',e=>{
+  state.addressPicked=false; validateStep();
+  const q=e.target.value.trim();
+  clearTimeout(addrTimer);
+  if(q.length<3){ sg.classList.remove('show'); return; }
+  addrTimer=setTimeout(()=>fetchSuggest(q),300);
+});
 addrInput.addEventListener('keydown',e=>{
   const items=$$('#suggest .sg'); if(!items.length) return;
   if(e.key==='ArrowDown'){ e.preventDefault(); hlIndex=Math.min(hlIndex+1,items.length-1); }

@@ -354,6 +354,8 @@ export type BookingInput = {
   preferredTime?: string;
   description?: string;
   photoUrls?: string[];
+  // Raw photo bytes to attach to the lead's Attachments tab in SimPro.
+  attachments?: { filename: string; base64: string }[];
 };
 
 // Orchestrates Customer -> Site -> Lead. Returns the created SimPro IDs.
@@ -397,6 +399,22 @@ export async function createBookingInSimpro(
     Description: `Service: ${b.service ?? '—'} | When: ${preferred} | ${b.ownerOrTenant ?? '—'}`,
     Notes: notes,
   });
+
+  // Upload the customer's photos into the lead's Attachments tab. Best-effort:
+  // a failed attachment never fails the booking (it's already saved + the lead exists).
+  if (b.attachments?.length) {
+    for (let i = 0; i < b.attachments.length; i++) {
+      const a = b.attachments[i];
+      try {
+        await simproPost(`/api/v1.0/companies/${cid}/leads/${lead.ID}/attachments/files/`, {
+          Filename: a.filename || `booking-photo-${i + 1}.jpg`,
+          Base64Data: a.base64,
+        });
+      } catch {
+        /* skip this attachment, keep going */
+      }
+    }
+  }
 
   return { customerId: customer.ID, siteId: site.ID, leadId: lead.ID };
 }
