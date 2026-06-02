@@ -2,8 +2,30 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Flowpro · Book Your Job</title>
+<meta name="description" content="Book a licensed Auckland plumber, gasfitter or drainlayer in under a minute. $199 + GST call-out — upfront pricing, no surprises.">
+<meta name="theme-color" content="#0D3556">
+
+<!-- Favicon / home-screen icon -->
+<link rel="icon" type="image/svg+xml" href="/flowpro-logo-new-1.svg">
+<link rel="apple-touch-icon" href="/flowpro-touch-icon.png">
+
+<!-- Social share card (SMS / WhatsApp / iMessage / socials) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Flowpro Plumbers & Gasfitters">
+<meta property="og:url" content="https://book.flowpro.co.nz/">
+<meta property="og:title" content="Book a Flowpro Plumber — Fast & Licensed">
+<meta property="og:description" content="Book a licensed Auckland plumber, gasfitter or drainlayer in under a minute. $199 + GST call-out — upfront pricing, no surprises.">
+<meta property="og:image" content="https://book.flowpro.co.nz/og-flowpro.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Flowpro Plumbers & Gasfitters — book your job online">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Book a Flowpro Plumber — Fast & Licensed">
+<meta name="twitter:description" content="Book a licensed Auckland plumber in under a minute. $199 + GST call-out — upfront pricing, no surprises.">
+<meta name="twitter:image" content="https://book.flowpro.co.nz/og-flowpro.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -35,7 +57,7 @@ body{
   box-shadow:0 30px 80px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.06), 0 0 0 10px rgba(255,255,255,.03);
   display:flex; flex-direction:column;
 }
-@media (max-width:480px){ body{padding:0} .phone{max-width:none; height:100vh; height:100dvh; border-radius:0} }
+@media (max-width:480px){ body{padding:0} }
 
 /* ===== Header (white, real logo) ===== */
 .appbar{background:var(--surface); border-bottom:1px solid var(--border); padding:12px 18px;
@@ -264,6 +286,44 @@ textarea.input{resize:none; min-height:84px; line-height:1.5}
 .toast svg{width:15px;height:15px; color:var(--cyan)}
 .spin{width:18px;height:18px; border:2.5px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation:rot .7s linear infinite}
 @keyframes rot{to{transform:rotate(360deg)}}
+
+/* ===================================================================== */
+/* MOBILE — let the WHOLE page flow & scroll, not a cramped inner pane.   */
+/* Placed last so these win over the base rules at equal specificity.     */
+/* ===================================================================== */
+@media (max-width:480px){
+  body{padding:0; display:block; background:var(--bg); overflow-x:hidden}
+  /* The frame becomes the page: full-bleed, no inner clip, grows with content */
+  .phone{
+    max-width:none; width:100%; min-height:100dvh; height:auto;
+    border-radius:0; box-shadow:none; overflow:visible;
+  }
+  /* Brand + progress stay pinned for context while everything scrolls naturally */
+  .appbar{position:sticky; top:0; z-index:30; height:52px; padding:0 16px}
+  .progress-wrap{position:sticky; top:52px; z-index:29; padding:9px 16px 11px}
+  /* No nested scroll — content flows in the page. Bottom padding clears the
+     fixed CTA bar so the last control is never hidden behind it. */
+  .scroll{overflow:visible; -webkit-overflow-scrolling:auto;
+    padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 150px)}
+  .slide{padding:18px 16px 8px}
+  /* CTA bar fixed to the bottom of the viewport, clear of the home indicator */
+  .footer{position:fixed; left:0; right:0; bottom:0; z-index:28;
+    padding:11px 16px calc(env(safe-area-inset-bottom, 0px) + 13px);
+    box-shadow:0 -6px 20px rgba(6,27,48,.10)}
+  /* Overlays cover the viewport, not the now-taller document */
+  .scrim, .sheet, .success, .toast-wrap{position:fixed}
+  h1.title{font-size:24px}
+  .slide .lead{max-width:none}
+}
+/* Short / landscape phones — tighten the pinned chrome so the form breathes */
+@media (max-width:480px) and (max-height:680px){
+  .appbar{height:48px}
+  .progress-wrap{top:48px; padding:7px 16px 8px}
+  .progress-top{margin-bottom:6px}
+  .dots{margin-top:7px}
+  .slide{padding-top:14px}
+  .lead{margin:7px 0 12px}
+}
 </style>
 </head>
 <body>
@@ -385,10 +445,10 @@ textarea.input{resize:none; min-height:84px; line-height:1.5}
       </div>
 
       <div class="blk-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3Z"/><circle cx="12" cy="13" r="3"/></svg> Add photos <span style="color:var(--muted-2);font-weight:500">(optional)</span></div>
-      <input type="file" id="fileInput" accept="image/*" multiple capture="environment" hidden>
+      <input type="file" id="fileInput" accept="image/*" multiple hidden>
       <div class="photo-bar" id="dropzone">
         <div class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
-        <div class="pt"><b>Tap to add photos</b><small>Faster, more accurate quote</small></div>
+        <div class="pt"><b>Tap to add photos</b><small>Take a photo or upload from your library</small></div>
       </div>
       <div class="thumbs" id="thumbs"></div>
     </section>
