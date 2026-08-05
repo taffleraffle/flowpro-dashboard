@@ -61,7 +61,7 @@ export default async function OverviewPage({
 
   const lastOk = runs.find(r => r.status === 'ok')?.started_at;
   const lastSyncLabel = lastOk
-    ? new Date(lastOk).toLocaleTimeString('en-NZ', { hour: '2-digit', minute: '2-digit' })
+    ? new Date(lastOk).toLocaleTimeString('en-NZ', { timeZone: 'Pacific/Auckland', hour: '2-digit', minute: '2-digit' })
     : 'never';
   // errorRuns set above via getActiveErrors() — only sources whose LATEST run failed
 

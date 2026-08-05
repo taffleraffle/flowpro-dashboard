@@ -386,7 +386,7 @@ export async function createBookingInSimpro(
     b.photoUrls && b.photoUrls.length
       ? `<p>Photos:<br>${b.photoUrls.map((u) => `<a href="${u}">${escapeHtml(u)}</a>`).join('<br>')}</p>`
       : '',
-    `<p><em>Submitted via the online booking form on ${new Date().toLocaleString('en-NZ')}.</em></p>`,
+    `<p><em>Submitted via the online booking form on ${new Date().toLocaleString('en-NZ', { timeZone: 'Pacific/Auckland' })}.</em></p>`,
   ]
     .filter(Boolean)
     .join('');

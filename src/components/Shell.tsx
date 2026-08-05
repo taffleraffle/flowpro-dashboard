@@ -384,7 +384,7 @@ function NotificationsButton({ count }: { count: number }) {
                 <span style={{ fontWeight: 600, fontSize: 13 }}>{bk.name}</span>
                 <span className={`badge ${bk.status === 'sent_to_simpro' ? 'green' : bk.status === 'error' ? 'red' : 'amber'}`}>{bk.ref}</span>
               </div>
-              <div className="tiny muted">{(bk.service ?? 'Booking')} · {new Date(bk.created_at).toLocaleString('en-NZ')}</div>
+              <div className="tiny muted">{(bk.service ?? 'Booking')} · {new Date(bk.created_at).toLocaleString('en-NZ', { timeZone: 'Pacific/Auckland' })}</div>
             </Link>
           ))}
           <div className="eyebrow" style={{ padding: '12px 6px 8px', borderTop: '1px solid var(--divider)' }}>Recent sync activity</div>
@@ -394,7 +394,7 @@ function NotificationsButton({ count }: { count: number }) {
             <div key={it.id} style={{ padding: '8px 8px', borderTop: '1px solid var(--divider)' }}>
               <div className="stack-h">
                 <span className={`badge ${it.error_message ? 'red' : 'green'}`}>{it.source}</span>
-                <span className="tiny muted">{new Date(it.started_at).toLocaleString('en-NZ')}</span>
+                <span className="tiny muted">{new Date(it.started_at).toLocaleString('en-NZ', { timeZone: 'Pacific/Auckland' })}</span>
               </div>
               {it.error_message && (
                 <div className="tiny" style={{ marginTop: 4, color: 'var(--danger)' }}>
@@ -513,7 +513,7 @@ function SettingsDrawer({ onClose }: { onClose: () => void }) {
                   <span className={`badge ${r.status === 'ok' ? 'green' : r.status === 'error' ? 'red' : 'amber'}`}>{r.status}</span>
                 </div>
                 <div className="tiny muted" style={{ marginTop: 2 }}>
-                  {new Date(r.started_at).toLocaleString('en-NZ')} · {r.rows_upserted ?? 0} rows
+                  {new Date(r.started_at).toLocaleString('en-NZ', { timeZone: 'Pacific/Auckland' })} · {r.rows_upserted ?? 0} rows
                 </div>
                 {r.error_message && (
                   <div className="tiny" style={{ marginTop: 4, color: 'var(--danger)' }}>

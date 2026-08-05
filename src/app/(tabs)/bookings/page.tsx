@@ -57,7 +57,7 @@ export default async function BookingsPage() {
                           <span className={`badge ${s.cls}`}>{s.label}</span>
                           {b.simpro_lead_id ? <span className="badge">Lead #{b.simpro_lead_id}</span> : null}
                         </div>
-                        <span className="tiny muted">{new Date(b.created_at).toLocaleString('en-NZ')}</span>
+                        <span className="tiny muted">{new Date(b.created_at).toLocaleString('en-NZ', { timeZone: 'Pacific/Auckland' })}</span>
                       </div>
 
                       <div style={{ marginTop: 8, display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)', gap: 8 }}>
