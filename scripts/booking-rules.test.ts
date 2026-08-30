@@ -1,7 +1,13 @@
 // Exercises the booking form's two new rules: which call-out rate applies
 // (src/lib/callout.ts) and the migration-008 insert fallback
 // (src/lib/bookings.ts). Run with: npm run test:booking
-import { resolveCallout } from '../src/lib/callout';
+import {
+  resolveCallout,
+  isAfterHours,
+  STANDARD_DAYS,
+  STANDARD_START_HOUR,
+  STANDARD_END_HOUR,
+} from '../src/lib/callout';
 import { isMissingBookingColumn } from '../src/lib/bookings';
 
 let pass = 0;
@@ -61,6 +67,43 @@ check('a different missing column is not ours',
   isMissingBookingColumn({ code: 'PGRST204', message: "Could not find the 'nickname' column of 'bookings' in the schema cache" }), false);
 check('no error at all', isMissingBookingColumn(null), false);
 check('error with no message', isMissingBookingColumn({ code: 'PGRST204' }), false);
+
+// --- The trading window, proved across all 168 hours of the week ---------
+// Counted independently of the rule itself: 5 weekdays x 10 hours (7am-4pm
+// inclusive) = 50 standard hours, and every other hour of the week is
+// after-hours. If someone widens the window, this count moves and says so.
+const DAY = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+let standardHours = 0;
+const wrongly: string[] = [];
+for (let day = 0; day < 7; day++) {
+  for (let hour = 0; hour < 24; hour++) {
+    const after = isAfterHours(day, hour);
+    if (!after) standardHours++;
+    const shouldBeStandard =
+      STANDARD_DAYS.includes(day) && hour >= STANDARD_START_HOUR && hour < STANDARD_END_HOUR;
+    if (after === shouldBeStandard) wrongly.push(`${DAY[day]} ${hour}:00`);
+  }
+}
+check('every hour of the week classified', wrongly, []);
+check('exactly 50 standard hours in the week', standardHours, 50);
+
+// The transitions, named, so a boundary slip is obvious in the output:
+check('Mon 06:00 is after-hours', isAfterHours(1, 6), true);
+check('Mon 07:00 opens standard', isAfterHours(1, 7), false);
+check('Mon 16:00 (4pm) still standard', isAfterHours(1, 16), false);
+check('Mon 17:00 (5pm) is after-hours', isAfterHours(1, 17), true);
+check('Fri 16:00 still standard', isAfterHours(5, 16), false);
+check('Fri 17:00 is after-hours', isAfterHours(5, 17), true);
+check('Sat 09:00 is after-hours', isAfterHours(6, 9), true);
+check('Sun 12:00 is after-hours', isAfterHours(0, 12), true);
+check('midnight Wed is after-hours', isAfterHours(3, 0), true);
+
+// The form only ever offers Morning / Afternoon / Evening / Anytime, so those
+// are the only hours a "Pick a date" booking can land on. Morning, Afternoon
+// and Anytime must be inside the window on a weekday; Evening must not be.
+check('Morning slot (9am) is standard', isAfterHours(3, 9), false);
+check('Afternoon slot (2pm) is standard', isAfterHours(3, 14), false);
+check('Evening slot (6pm) is after-hours', isAfterHours(3, 18), true);
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

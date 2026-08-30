@@ -9,8 +9,23 @@
 // whatever the browser showed, what gets stored and pushed to SimPro is computed
 // here, in NZ time, from the timing the customer actually chose.
 
-export const STANDARD_CALLOUT = 199; // + GST, Mon–Fri 7am–5pm
-export const AFTER_HOURS_CALLOUT = 379; // + GST, evenings, early mornings, weekends
+export const STANDARD_CALLOUT = 199; // + GST, inside the trading window below
+export const AFTER_HOURS_CALLOUT = 379; // + GST, everything outside it
+
+// The trading window. Change these three and both rates follow, here and in the
+// customer-facing copy on public/book.html (which mirrors them).
+// NOT independently confirmed with FlowPro: taken from what the form already
+// said. If their real window differs (Saturday mornings are the usual one), this
+// is the only place it needs correcting.
+export const STANDARD_DAYS = [1, 2, 3, 4, 5]; // Mon-Fri (0 = Sunday)
+export const STANDARD_START_HOUR = 7; // from 7:00am, inclusive
+export const STANDARD_END_HOUR = 17; // until 5:00pm, exclusive
+
+// The whole rule, in one place, so it can be proved across all 168 hours of the
+// week rather than spot-checked. A job at 4:59pm is standard; 5:00pm is not.
+export function isAfterHours(day: number, hour: number): boolean {
+  return !STANDARD_DAYS.includes(day) || hour < STANDARD_START_HOUR || hour >= STANDARD_END_HOUR;
+}
 
 export type RequestType = 'booking' | 'quote';
 
@@ -65,7 +80,7 @@ export function resolveCallout(t: CalloutTiming): Callout {
   // 'ASAP' (and anything unrecognised) is judged on the current NZ time.
 
   const weekend = day === 0 || day === 6;
-  const afterHours = weekend || hour >= 17 || hour < 7;
+  const afterHours = isAfterHours(day, hour);
 
   return {
     afterHours,

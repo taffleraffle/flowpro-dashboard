@@ -577,8 +577,14 @@ const isQuote = () => state.intent === 'quote';
 /* ---------- Call-out rates ----------
    Mirrors src/lib/callout.ts, which is the source of truth: the server
    recomputes both values on submit. Keep the two in step if rates change. */
-const STANDARD_CALLOUT = 199;    // + GST, Mon-Fri 7am-5pm
-const AFTER_HOURS_CALLOUT = 379; // + GST, evenings, early mornings, weekends
+const STANDARD_CALLOUT = 199;    // + GST, inside the trading window below
+const AFTER_HOURS_CALLOUT = 379; // + GST, everything outside it
+const STANDARD_DAYS = [1,2,3,4,5];  // Mon-Fri (0 = Sunday)
+const STANDARD_START_HOUR = 7;      // from 7:00am, inclusive
+const STANDARD_END_HOUR = 17;       // until 5:00pm, exclusive
+const HOURS_LABEL = 'Mon\u2013Fri, 7am\u20135pm';
+const isAfterHours = (day,hour) =>
+  !STANDARD_DAYS.includes(day) || hour < STANDARD_START_HOUR || hour >= STANDARD_END_HOUR;
 
 let toastT;
 function toast(msg){ $('#toastMsg').textContent=msg; $('#toast').classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>$('#toast').classList.remove('show'),2200); }
@@ -708,7 +714,7 @@ function applyIntent(){
     ? "Pop your details in and we'll come back to you with a price. No plumber is sent out yet."
     : "Pop your details in and we'll get a Flowpro plumber booked to your job.";
   $('#intentNote').innerHTML = q
-    ? "<b>Just after a price?</b> No problem. We'll look at what you've sent and come back to you. No plumber is dispatched and <b>no call-out fee applies</b> until you approve a booking."
+    ? "<b>We'll look at what you've sent and come back to you with a price.</b> No plumber is dispatched and <b>no call-out fee applies</b> until you approve a booking."
     : "<b>Booking a plumber in.</b> We'll confirm a time and a licensed plumber attends your address. A call-out fee applies once they're dispatched. You'll see the exact rate before you confirm.";
   $('#s3-title').textContent = q ? 'Confirm & send' : 'Confirm & book';
   $('#s3-lead').textContent = q
@@ -776,7 +782,7 @@ function rateContext(){
     day=1; hour=9;                                          // not urgent -> normal business hours
   }
   const weekend=(day===0||day===6);
-  const afterHours = weekend || hour>=17 || hour<7;
+  const afterHours = isAfterHours(day, hour);
   return { afterHours, weekend, rate: afterHours?AFTER_HOURS_CALLOUT:STANDARD_CALLOUT,
            label: afterHours?'after-hours call-out':'standard call-out' };
 }
@@ -793,7 +799,7 @@ function rateCardHtml(){
     + `<div class="rl"><b>${name}</b><small>${when}</small>${on?'<span class="tag">Applies to you</span>':''}</div>`
     + `<div class="rv">$${amount} <small>+GST</small></div></div>`;
   const rows =
-    row('Standard call-out','Mon–Fri, 7am–5pm',STANDARD_CALLOUT, !q && !c.afterHours) +
+    row('Standard call-out',HOURS_LABEL,STANDARD_CALLOUT, !q && !c.afterHours) +
     row('After-hours call-out','Evenings, early mornings &amp; weekends',AFTER_HOURS_CALLOUT, !q && c.afterHours);
   if(q){
     return `<div class="rate-card">
@@ -837,10 +843,10 @@ function buildDoc(){
   const el=$('#doc-rate');
   if(el){
     el.innerHTML = q
-      ? `<strong>No call-out fee applies to this request.</strong> If you go ahead, the standard call-out is <strong>$${STANDARD_CALLOUT} + GST</strong> (Mon–Fri 7am–5pm) and after-hours is <strong>$${AFTER_HOURS_CALLOUT} + GST</strong>. Each is a minimum charge covering the first hour on site &amp; travel.`
+      ? `<strong>No call-out fee applies to this request.</strong> If you go ahead, the standard call-out is <strong>$${STANDARD_CALLOUT} + GST</strong> (${HOURS_LABEL}) and after-hours is <strong>$${AFTER_HOURS_CALLOUT} + GST</strong>. Each is a minimum charge covering the first hour on site &amp; travel.`
       : c.afterHours
         ? `Based on your timing, the <strong>after-hours call-out</strong> applies: <strong>$${AFTER_HOURS_CALLOUT} + GST</strong> (minimum charge)${c.weekend?', weekend rate':''}. Includes the first hour on site &amp; travel.`
-        : `Based on your timing, the <strong>standard call-out</strong> applies: <strong>$${STANDARD_CALLOUT} + GST</strong> (minimum charge), Mon–Fri 7am–5pm. Includes the first hour on site &amp; travel.`;
+        : `Based on your timing, the <strong>standard call-out</strong> applies: <strong>$${STANDARD_CALLOUT} + GST</strong> (minimum charge), ${HOURS_LABEL}. Includes the first hour on site &amp; travel.`;
   }
 }
 
