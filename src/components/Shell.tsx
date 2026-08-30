@@ -309,7 +309,7 @@ function SearchBox() {
 // ============================================================
 // Notifications bell (kept as client — needs fetch)
 // ============================================================
-type BellBooking = { id: string; ref: string; name: string; service: string | null; status: string; created_at: string };
+type BellBooking = { id: string; ref: string; name: string; service: string | null; status: string; created_at: string; request_type?: 'booking' | 'quote' | null };
 
 function NotificationsButton({ count }: { count: number }) {
   const [open, setOpen] = useState(false);
@@ -384,7 +384,10 @@ function NotificationsButton({ count }: { count: number }) {
                 <span style={{ fontWeight: 600, fontSize: 13 }}>{bk.name}</span>
                 <span className={`badge ${bk.status === 'sent_to_simpro' ? 'green' : bk.status === 'error' ? 'red' : 'amber'}`}>{bk.ref}</span>
               </div>
-              <div className="tiny muted">{(bk.service ?? 'Booking')} · {new Date(bk.created_at).toLocaleString('en-NZ', { timeZone: 'Pacific/Auckland' })}</div>
+              <div className="tiny muted">
+                {bk.request_type === 'quote' ? `Quote · ${bk.service ?? 'General'}` : (bk.service ?? 'Booking')}
+                {' · '}{new Date(bk.created_at).toLocaleString('en-NZ', { timeZone: 'Pacific/Auckland' })}
+              </div>
             </Link>
           ))}
           <div className="eyebrow" style={{ padding: '12px 6px 8px', borderTop: '1px solid var(--divider)' }}>Recent sync activity</div>

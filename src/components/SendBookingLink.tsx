@@ -6,6 +6,7 @@ import { sendBookingLink } from '@/lib/send-link-action';
 export function SendBookingLink() {
   const [phone, setPhone] = useState('');
   const [name, setName] = useState('');
+  const [type, setType] = useState<'booking' | 'quote'>('booking');
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, start] = useTransition();
 
@@ -14,7 +15,7 @@ export function SendBookingLink() {
     setMsg(null);
     start(async () => {
       try {
-        const r = await sendBookingLink({ phone, name });
+        const r = await sendBookingLink({ phone, name, type });
         setMsg({ ok: r.ok, text: r.message });
         if (r.ok) { setPhone(''); setName(''); }
       } catch {
@@ -34,11 +35,25 @@ export function SendBookingLink() {
         <div>
           <div className="eyebrow">Send booking link</div>
           <h3 className="card-title">Text a customer the booking form</h3>
-          <div className="card-sub">Enter their mobile and we’ll send a link to the online booking flow.</div>
+          <div className="card-sub">
+            Enter their mobile and we’ll send a link to the online form. Send the quote version if
+            they’re only after a price: it opens with no call-out fee attached.
+          </div>
         </div>
       </div>
       <div className="card-b">
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <label style={{ flex: '1 1 150px' }}>
+            <div className="tiny muted" style={{ marginBottom: 4 }}>Send them</div>
+            <select
+              style={input}
+              value={type}
+              onChange={(e) => setType(e.target.value as 'booking' | 'quote')}
+            >
+              <option value="booking">Booking form</option>
+              <option value="quote">Quote request form</option>
+            </select>
+          </label>
           <label style={{ flex: '1 1 160px' }}>
             <div className="tiny muted" style={{ marginBottom: 4 }}>First name (optional)</div>
             <input style={input} value={name} onChange={(e) => setName(e.target.value)} placeholder="Sarah" />

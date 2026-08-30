@@ -8,6 +8,8 @@
 //
 // Docs: https://developer.simprogroup.com/apidoc/?page=3366d2ea7906f693b27d57ed9cca3acb
 
+import type { Callout, RequestType } from './callout';
+
 type SimproEnv = {
   tenant: string;
   clientId: string;
@@ -347,6 +349,9 @@ export type BookingInput = {
   email: string;
   phone: string;
   address: string;
+  // 'quote' = the customer only wants a price; no plumber has been dispatched.
+  requestType?: RequestType;
+  callout?: Callout;
   service?: string;
   urgency?: string;
   ownerOrTenant?: string;
@@ -380,23 +385,32 @@ export async function createBookingInSimpro(
 
   const preferred =
     b.preferredDate ? `${b.preferredDate}${b.preferredTime ? ` (${b.preferredTime})` : ''}` : (b.urgency ?? '—');
+  const isQuote = b.requestType === 'quote';
+  // Rate line the office needs at a glance: it's what the customer was shown.
+  const rateLine = isQuote
+    ? 'Quote request: no call-out fee committed. Price the job before booking a visit.'
+    : b.callout
+      ? `${b.callout.label}: $${b.callout.rate} + GST (min charge, incl. first hour & travel)`
+      : '';
   const notes = [
+    `<p><strong>${isQuote ? 'QUOTE REQUEST' : 'JOB BOOKING'}</strong></p>`,
+    rateLine ? `<p><strong>${escapeHtml(rateLine)}</strong></p>` : '',
     `<p><strong>${escapeHtml(b.ownerOrTenant ?? 'Owner/Tenant not stated')}</strong> · Preferred: ${escapeHtml(preferred)}</p>`,
     b.description ? `<p>${escapeHtml(b.description)}</p>` : '',
     b.photoUrls && b.photoUrls.length
       ? `<p>Photos:<br>${b.photoUrls.map((u) => `<a href="${u}">${escapeHtml(u)}</a>`).join('<br>')}</p>`
       : '',
-    `<p><em>Submitted via the online booking form on ${new Date().toLocaleString('en-NZ', { timeZone: 'Pacific/Auckland' })}.</em></p>`,
+    `<p><em>Submitted via the online ${isQuote ? 'quote request' : 'booking'} form on ${new Date().toLocaleString('en-NZ', { timeZone: 'Pacific/Auckland' })}.</em></p>`,
   ]
     .filter(Boolean)
     .join('');
 
   const lead = await simproPost<{ ID: number }>(`/api/v1.0/companies/${cid}/leads/`, {
-    LeadName: `${b.service ?? 'Booking'} — ${b.urgency ?? ''} — ${b.name}`.slice(0, 250),
+    LeadName: `${isQuote ? 'QUOTE' : 'BOOKING'} — ${b.service ?? 'General'} — ${b.urgency ?? ''} — ${b.name}`.slice(0, 250),
     Customer: customer.ID,
     Site: site.ID,
     Stage: 'Open',
-    Description: `Service: ${b.service ?? '—'} | When: ${preferred} | ${b.ownerOrTenant ?? '—'}`,
+    Description: `${isQuote ? 'Quote request' : 'Job booking'} | Service: ${b.service ?? '—'} | When: ${preferred} | ${b.ownerOrTenant ?? '—'}${rateLine ? ` | ${rateLine}` : ''}`,
     Notes: notes,
   });
 

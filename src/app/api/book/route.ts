@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getServerSupabase } from '@/lib/supabase';
+import { isMissingBookingColumn } from '@/lib/bookings';
 import { createBookingInSimpro } from '@/lib/simpro';
+import { resolveCallout } from '@/lib/callout';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60; // SimPro does 3 sequential creates + photo uploads
@@ -16,6 +18,7 @@ const BookingSchema = z.object({
   email: z.string().trim().email().max(160),
   phone: z.string().trim().min(6).max(40),
   address: z.string().trim().min(3).max(300),
+  request_type: z.enum(['booking', 'quote']).optional(), // quote = no plumber dispatched yet
   service: z.string().trim().max(60).optional(),
   urgency: z.string().trim().max(60).optional(),
   owner_or_tenant: z.string().trim().max(20).optional(),
@@ -46,11 +49,20 @@ export async function POST(req: NextRequest) {
     );
   }
   const b = parsed.data;
+  const requestType = b.request_type ?? 'booking';
 
   // Honeypot tripped → silently accept (don't tip off bots) but store nothing.
   if (b.company && b.company.trim() !== '') {
     return NextResponse.json({ success: true, data: { ref: makeRef() } });
   }
+
+  // Recompute the call-out server-side in NZ time. The browser showed the
+  // customer a rate; this is the one we record and send to SimPro.
+  const callout = resolveCallout({
+    urgency: b.urgency,
+    preferredDate: b.preferred_date,
+    preferredTime: b.preferred_time,
+  });
 
   const supabase = getServerSupabase();
   const ref = makeRef();
@@ -81,27 +93,48 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // A quote request isn't a dispatch, so no call-out is committed to yet.
+  const calloutRate = requestType === 'quote' ? null : callout.rate;
+
   // 1) Persist the booking first so it's never lost, even if SimPro is down.
-  const { data: inserted, error: insErr } = await supabase
+  const row = {
+    ref,
+    name: b.name,
+    email: b.email,
+    phone: b.phone,
+    address: b.address,
+    service: b.service ?? null,
+    urgency: b.urgency ?? null,
+    owner_or_tenant: b.owner_or_tenant ?? null,
+    preferred_date: b.preferred_date ?? null,
+    preferred_time: b.preferred_time ?? null,
+    description: b.description ?? null,
+    photo_urls: photoUrls,
+    status: 'new',
+    raw: {
+      service: b.service,
+      urgency: b.urgency,
+      photo_count: b.photos?.length ?? 0,
+      request_type: requestType,
+      after_hours: callout.afterHours,
+      callout_rate: calloutRate,
+    },
+  };
+  const newColumns = { request_type: requestType, after_hours: callout.afterHours, callout_rate: calloutRate };
+
+  let { data: inserted, error: insErr } = await supabase
     .from('bookings')
-    .insert({
-      ref,
-      name: b.name,
-      email: b.email,
-      phone: b.phone,
-      address: b.address,
-      service: b.service ?? null,
-      urgency: b.urgency ?? null,
-      owner_or_tenant: b.owner_or_tenant ?? null,
-      preferred_date: b.preferred_date ?? null,
-      preferred_time: b.preferred_time ?? null,
-      description: b.description ?? null,
-      photo_urls: photoUrls,
-      status: 'new',
-      raw: { service: b.service, urgency: b.urgency, photo_count: b.photos?.length ?? 0 },
-    })
+    .insert({ ...row, ...newColumns })
     .select('id, ref')
     .single();
+
+  if (insErr && isMissingBookingColumn(insErr)) {
+    ({ data: inserted, error: insErr } = await supabase
+      .from('bookings')
+      .insert(row) // migration 008 not applied yet; `raw` still carries the detail
+      .select('id, ref')
+      .single());
+  }
 
   if (insErr || !inserted) {
     return NextResponse.json(
@@ -118,6 +151,8 @@ export async function POST(req: NextRequest) {
       email: b.email,
       phone: b.phone,
       address: b.address,
+      requestType,
+      callout,
       service: b.service,
       urgency: b.urgency,
       ownerOrTenant: b.owner_or_tenant,
@@ -146,5 +181,5 @@ export async function POST(req: NextRequest) {
     // SimPro push just needs a retry. Don't fail the customer's submission.
   }
 
-  return NextResponse.json({ success: true, data: { ref } });
+  return NextResponse.json({ success: true, data: { ref, request_type: requestType } });
 }

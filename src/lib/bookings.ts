@@ -1,6 +1,7 @@
 import { getServerSupabase } from './supabase';
 
 export type BookingStatus = 'new' | 'sent_to_simpro' | 'error';
+export type BookingRequestType = 'booking' | 'quote';
 
 export type BookingRow = {
   id: string;
@@ -9,6 +10,10 @@ export type BookingRow = {
   email: string;
   phone: string;
   address: string;
+  // Added in migration 008: null on bookings taken before it was applied.
+  request_type: BookingRequestType | null;
+  after_hours: boolean | null;
+  callout_rate: number | null;
   service: string | null;
   urgency: string | null;
   owner_or_tenant: string | null;
@@ -24,6 +29,17 @@ export type BookingRow = {
   seen: boolean;
   created_at: string;
 };
+
+// request_type / after_hours / callout_rate arrive with migration 008. If a
+// deploy lands before that migration is applied, PostgREST rejects an insert
+// naming them and the whole booking would be lost, so POST /api/book retries
+// without them. True when the error says one of those columns is unknown.
+export function isMissingBookingColumn(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false;
+  const msg = (error.message ?? '').toLowerCase();
+  const namesOne = ['request_type', 'after_hours', 'callout_rate'].some((c) => msg.includes(c));
+  return namesOne && (error.code === 'PGRST204' || msg.includes('column'));
+}
 
 // Reads are defensive: if the bookings table doesn't exist yet (migration not
 // applied), return empty rather than crashing the dashboard.

@@ -25,7 +25,9 @@ export default async function BookingsPage() {
             <div>
               <div className="eyebrow">Online bookings</div>
               <h3 className="card-title">Submitted via the booking form</h3>
-              <div className="card-sub">Each booking creates a Customer + Lead in SimPro automatically.</div>
+              <div className="card-sub">
+                Each booking or quote request creates a Customer + Lead in SimPro automatically.
+              </div>
             </div>
             <span className="badge cyan">{bookings.length} total</span>
           </div>
@@ -38,6 +40,13 @@ export default async function BookingsPage() {
               <div style={{ display: 'grid', gap: 10 }}>
                 {bookings.map((b) => {
                   const s = STATUS[b.status] ?? STATUS.new;
+                  const isQuote = b.request_type === 'quote';
+                  // Rate the customer was shown. Quotes commit to no call-out.
+                  const rate = isQuote
+                    ? 'Quote first, no call-out fee yet'
+                    : b.callout_rate != null
+                      ? `${b.after_hours ? 'After-hours' : 'Standard'} call-out · $${Number(b.callout_rate)} + GST`
+                      : null;
                   const when = b.preferred_date
                     ? `${b.preferred_date}${b.preferred_time ? ` · ${b.preferred_time}` : ''}`
                     : b.urgency;
@@ -54,6 +63,9 @@ export default async function BookingsPage() {
                       <div className="stack-h" style={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
                         <div className="stack-h" style={{ gap: 10 }}>
                           <span style={{ fontWeight: 700 }}>{b.ref}</span>
+                          <span className={`badge ${isQuote ? 'amber' : 'cyan'}`}>
+                            {isQuote ? 'Quote request' : 'Job booking'}
+                          </span>
                           <span className={`badge ${s.cls}`}>{s.label}</span>
                           {b.simpro_lead_id ? <span className="badge">Lead #{b.simpro_lead_id}</span> : null}
                         </div>
@@ -72,6 +84,14 @@ export default async function BookingsPage() {
                             <span style={{ fontWeight: 600 }}>{b.service ?? 'Service —'}</span>
                             {when ? <span className="muted"> · {when}</span> : null}
                           </div>
+                          {rate ? (
+                            <div
+                              className="tiny"
+                              style={{ marginTop: 2, fontWeight: 600, color: b.after_hours ? 'var(--warn)' : 'var(--muted)' }}
+                            >
+                              {rate}
+                            </div>
+                          ) : null}
                           {b.description ? (
                             <div className="tiny muted" style={{ marginTop: 2 }}>{b.description.slice(0, 160)}</div>
                           ) : null}

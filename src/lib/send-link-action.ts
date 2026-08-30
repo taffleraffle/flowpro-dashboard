@@ -34,7 +34,7 @@ async function sendViaClickSend(to: string, body: string): Promise<{ ok: boolean
   const j: any = await res.json().catch(() => ({}));
   const m = j?.data?.messages?.[0];
   if (res.ok && (m?.status === 'SUCCESS' || j?.response_code === 'SUCCESS')) {
-    return { ok: true, message: `Booking link texted to ${to}` };
+    return { ok: true, message: `Link texted to ${to}` };
   }
   return { ok: false, message: `Couldn’t send (ClickSend: ${m?.status || j?.response_msg || res.status}).` };
 }
@@ -51,17 +51,26 @@ async function sendViaTwilio(to: string, body: string): Promise<{ ok: boolean; m
     body: form.toString(),
     cache: 'no-store',
   });
-  if (res.ok) return { ok: true, message: `Booking link texted to ${to}` };
+  if (res.ok) return { ok: true, message: `Link texted to ${to}` };
   const t = await res.text().catch(() => '');
   return { ok: false, message: `Couldn’t send (Twilio ${res.status}): ${t.slice(0, 140)}` };
 }
 
-export async function sendBookingLink(input: { phone: string; name?: string }): Promise<{ ok: boolean; message: string }> {
+export async function sendBookingLink(input: {
+  phone: string;
+  name?: string;
+  // 'quote' opens the form on the quote path, for callers who only want a price.
+  type?: 'booking' | 'quote';
+}): Promise<{ ok: boolean; message: string }> {
   const to = normalizeNZ(input.phone);
   if (!to) return { ok: false, message: 'That doesn’t look like a valid mobile number.' };
 
+  const isQuote = input.type === 'quote';
+  const url = isQuote ? `${BOOKING_URL}${BOOKING_URL.includes('?') ? '&' : '?'}type=quote` : BOOKING_URL;
   const name = (input.name || '').trim().split(/\s+/)[0];
-  const content = `Hi${name ? ' ' + name : ''}, thanks for contacting Flow Pro & A Plumber Near Me. To get your job booked in, tap here and fill in a few quick details: ${BOOKING_URL}`;
+  const content = isQuote
+    ? `Hi${name ? ' ' + name : ''}, thanks for contacting Flow Pro & A Plumber Near Me. For a no-obligation price, tap here and tell us a bit about the job. No call-out fee to ask: ${url}`
+    : `Hi${name ? ' ' + name : ''}, thanks for contacting Flow Pro & A Plumber Near Me. To get your job booked in, tap here and fill in a few quick details: ${url}`;
 
   try {
     if (process.env.CLICKSEND_USERNAME && process.env.CLICKSEND_API_KEY) return await sendViaClickSend(to, content);

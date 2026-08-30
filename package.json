@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test:booking": "tsx scripts/booking-rules.test.ts",
     "sync:simpro": "tsx scripts/run-sync.ts simpro",
     "sync:whatconverts": "tsx scripts/run-sync.ts whatconverts",
     "sync:all": "tsx scripts/run-sync.ts all"
